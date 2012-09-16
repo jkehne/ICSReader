@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">ICS sync provider</string>
     <string name="ACCOUNT_TYPE">de.int80.ics.sync.provider.ICSCalendar</string>
+    <string name="USERNAME_LABEL">User:</string>
+    <string name="PASSWORD_LABEL">Password:</string>
+    <string name="OKBUTTON_LABEL">OK</string>
+    <string name="CANCELBUTTON_LABEL">Abbrechen</string>
+    <string name="URL_LABEL">Calendar URL:</string>
 </resources>

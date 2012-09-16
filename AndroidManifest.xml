@@ -15,7 +15,7 @@
                 <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>
             <meta-data android:name="android.accounts.AccountAuthenticator" 
-                android:resource="@xml/authenticator"/>
+                android:resource="@xml/account_authenticator"/>
         </service>
         
     </application>

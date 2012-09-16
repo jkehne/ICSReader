@@ -34,7 +34,7 @@ public class AccountAuthenticatorService extends Service {
 			Bundle reply = new Bundle();
 			
 			Intent i = new Intent(mContext, LoginScreen.class);
-			i.setAction("fm.last.android.sync.LOGIN");
+			i.setAction("de.int80.ics.sync.provider.LOGIN");
 			i.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 			reply.putParcelable(AccountManager.KEY_INTENT, i);
 
