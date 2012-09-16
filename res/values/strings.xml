@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ICS sync provider</string>
+    <string name="ACCOUNT_TYPE">de.int80.ics.sync.provider.ICSCalendar</string>
 </resources>
