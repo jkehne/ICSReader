@@ -17,6 +17,7 @@
             <meta-data android:name="android.accounts.AccountAuthenticator" 
                 android:resource="@xml/account_authenticator"/>
         </service>
+        <activity android:name="LoginScreen"></activity>
         
     </application>
 
