@@ -16,10 +16,11 @@ import android.util.Log;
 
 public class ICSCalendarSyncAdapterService extends Service {
 
-	private static class ICSCalendarSyncAdapterImpl extends
+	private class ICSCalendarSyncAdapterImpl extends
 			AbstractThreadedSyncAdapter {
 
 		private Context mContext;
+		private static final String TAG = "ICSCalendarSyncAdapterImpl";
 
 		public ICSCalendarSyncAdapterImpl(Context context) {
 			super(context, true);
@@ -30,18 +31,16 @@ public class ICSCalendarSyncAdapterService extends Service {
 		public void onPerformSync(Account account, Bundle extras,
 				String authority, ContentProviderClient provider,
 				SyncResult syncResult) {
-			try {
-				ICSCalendarSyncAdapterService.performSync(mContext, account, extras, authority, provider, syncResult);
-			} catch (OperationCanceledException e) {
-				//NOP
-			}
+			Log.i(TAG, "performSync: " + account.toString());
+			String calendarURL = AccountManager.get(ICSCalendarSyncAdapterService.this).getUserData(account, CALENDAR_URL_KEY);
+			Log.i(TAG, "Calendar URL is " + calendarURL);
+			//This is where the magic will happen!
 		}
 
 	}
 
 	private static final String TAG = "ICSCalendarSyncAdapterService";
 	private static String CALENDAR_URL_KEY;
-	private static ContentResolver mContentResolver;
 	private static ICSCalendarSyncAdapterImpl sSyncAdapter;
 
 	public ICSCalendarSyncAdapterService() {
@@ -60,14 +59,5 @@ public class ICSCalendarSyncAdapterService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		return getSyncAdapter().getSyncAdapterBinder();
-	}
-	
-	private static void performSync(Context context, Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult)
-			throws OperationCanceledException {
-		mContentResolver = context.getContentResolver();
-		Log.i(TAG, "performSync: " + account.toString());
-		String calendarURL = AccountManager.get(context).getUserData(account, CALENDAR_URL_KEY);
-		Log.i(TAG, "Calendar URL is " + calendarURL);
-		//This is where the magic will happen!
-	}
+	}	
 }
