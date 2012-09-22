@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
+import android.content.ContentResolver;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,7 +31,7 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 				EditText username = (EditText) findViewById(R.id.userNameField);
 				EditText password = (EditText) findViewById(R.id.passwordField);
 				EditText url = (EditText) findViewById(R.id.calendarURLField);
-				
+
 				Account account = new Account(username.getText().toString(), getString(R.string.ACCOUNT_TYPE));
 				AccountManager am = AccountManager.get(LoginScreen.this);
 				
@@ -38,6 +39,8 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 				extras.putString(getString(R.string.URL_KEY), url.getText().toString());
 				
 				am.addAccountExplicitly(account, password.getText().toString(), extras);
+
+				ContentResolver.addPeriodicSync(account, "com.android.calendar", extras, 1800);
 				
 				Bundle result = new Bundle();
 				result.putString(AccountManager.KEY_ACCOUNT_NAME, username.getText().toString());
