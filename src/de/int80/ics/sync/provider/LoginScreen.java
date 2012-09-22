@@ -29,11 +29,15 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 			public void onClick(View v) {
 				EditText username = (EditText) findViewById(R.id.userNameField);
 				EditText password = (EditText) findViewById(R.id.passwordField);
+				EditText url = (EditText) findViewById(R.id.calendarURLField);
 				
 				Account account = new Account(username.getText().toString(), getString(R.string.ACCOUNT_TYPE));
 				AccountManager am = AccountManager.get(LoginScreen.this);
-				//fixme: pass the URL
-				am.addAccountExplicitly(account, password.getText().toString(), null);
+				
+				Bundle extras = new Bundle();
+				extras.putString(getString(R.string.URL_KEY), url.getText().toString());
+				
+				am.addAccountExplicitly(account, password.getText().toString(), extras);
 				
 				Bundle result = new Bundle();
 				result.putString(AccountManager.KEY_ACCOUNT_NAME, username.getText().toString());

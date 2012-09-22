@@ -6,4 +6,5 @@
     <string name="OKBUTTON_LABEL">OK</string>
     <string name="CANCELBUTTON_LABEL">Abbrechen</string>
     <string name="URL_LABEL">Calendar URL:</string>
+    <string name="URL_KEY">de.int80.ics.sync.provider.CalendarURL</string>
 </resources>

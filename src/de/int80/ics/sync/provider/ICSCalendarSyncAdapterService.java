@@ -1,6 +1,7 @@
 package de.int80.ics.sync.provider;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.accounts.OperationCanceledException;
 import android.app.Service;
 import android.content.AbstractThreadedSyncAdapter;
@@ -39,6 +40,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 	}
 
 	private static final String TAG = "ICSCalendarSyncAdapterService";
+	private static String CALENDAR_URL_KEY;
 	private static ContentResolver mContentResolver;
 	private static ICSCalendarSyncAdapterImpl sSyncAdapter;
 
@@ -47,8 +49,11 @@ public class ICSCalendarSyncAdapterService extends Service {
 	}
 
 	private ICSCalendarSyncAdapterImpl getSyncAdapter() {
-		if (sSyncAdapter == null)
+		if (sSyncAdapter == null) {
 			sSyncAdapter = new ICSCalendarSyncAdapterImpl(this);
+			CALENDAR_URL_KEY = getString(R.string.URL_KEY);
+		}
+		
 		return sSyncAdapter;
 	}
 	
@@ -61,6 +66,8 @@ public class ICSCalendarSyncAdapterService extends Service {
 			throws OperationCanceledException {
 		mContentResolver = context.getContentResolver();
 		Log.i(TAG, "performSync: " + account.toString());
+		String calendarURL = AccountManager.get(context).getUserData(account, CALENDAR_URL_KEY);
+		Log.i(TAG, "Calendar URL is " + calendarURL);
 		//This is where the magic will happen!
 	}
 }
