@@ -3,7 +3,7 @@
     android:versionCode="1"
     android:versionName="1.0">
 
-    <uses-sdk android:minSdkVersion="5" android:targetSdkVersion="15" />
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="15" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
@@ -26,7 +26,7 @@
                 android:resource="@xml/account_authenticator"/>
         </service>
         <activity android:name="LoginScreen"></activity>
-        <service android:process=":contacts" android:name="ICSCalendarSyncAdapterService" android:exported="true">
+        <service android:process=":calendar" android:name="ICSCalendarSyncAdapterService" android:exported="true">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter"/>
             </intent-filter>
