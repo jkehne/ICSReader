@@ -5,6 +5,21 @@
     <string name="PASSWORD_LABEL">Password:</string>
     <string name="OKBUTTON_LABEL">OK</string>
     <string name="CANCELBUTTON_LABEL">Abbrechen</string>
-    <string name="URL_LABEL">Calendar URL:</string>
+    <string name="CALENDAR_NAME_LABEL">Calendar Name:</string><string name="SYNC_INTERVAL_LABEL">Sync interval:</string><string name="URL_LABEL">Calendar URL:</string>
     <string name="URL_KEY">de.int80.ics.sync.provider.CalendarURL</string>
+    <string name="USERNAME_KEY">de.int80.ics.sync.provider.CalendarUserName</string>
+    
+    <string-array name="SYNC_INTERVAL_ARRAY">
+        <item>Nie</item><item >30 Sek</item>
+        <item >1 Min</item>
+        <item >2 Min</item>
+        <item >5 Min</item>
+        <item >10 Min</item>
+        <item >15 Min</item>
+        <item >30 Min</item>
+        <item >45 Min</item>
+        <item >1 Std</item>
+        
+    </string-array>
+    
 </resources>

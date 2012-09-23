@@ -5,6 +5,26 @@
     android:layout_height="match_parent" >
 
     <TableRow
+        android:id="@+id/tableRow5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/CALENDAR_NAME_LABEL" />
+
+        <EditText
+            android:id="@+id/calendarNameField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textEmailSubject" />
+
+    </TableRow>
+
+    <TableRow
         android:id="@+id/tableRow4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
@@ -41,7 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="textPersonName" >
+            android:inputType="textNoSuggestions|textPersonName" >
 
             <requestFocus />
         </EditText>
@@ -65,6 +85,25 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textPassword" />
+
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/tableRow6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/SYNC_INTERVAL_LABEL" />
+
+        <Spinner
+            android:id="@+id/syncIntervalField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/SYNC_INTERVAL_ARRAY" />
 
     </TableRow>
 
