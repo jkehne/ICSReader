@@ -73,9 +73,15 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 				Account account = new Account(calendarName.getText().toString(), getString(R.string.ACCOUNT_TYPE));
 				AccountManager am = AccountManager.get(LoginScreen.this);
 				
+				CalendarHandle handle = new CalendarHandle(
+						LoginScreen.this, 
+						calendarName.getText().toString(), 
+						getString(R.string.ACCOUNT_TYPE));
+				
 				Bundle extras = new Bundle();
 				extras.putString(getString(R.string.USERNAME_KEY), username.getText().toString());
 				extras.putString(getString(R.string.URL_KEY), url.getText().toString());
+				extras.putLong(getString(R.string.CALENDAR_ID_KEY), handle.getCalID());
 				
 				am.addAccountExplicitly(account, password.getText().toString(), extras);
 
