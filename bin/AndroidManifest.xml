@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.int80.ics.sync.provider"
+    package="de.int80.ics.reader"
     android:versionCode="1"
     android:versionName="1.0">
 

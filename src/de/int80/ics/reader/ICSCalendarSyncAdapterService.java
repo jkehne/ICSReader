@@ -14,7 +14,7 @@
  * with ICSReader; if not, see http://www.gnu.org/licenses.
  */
 
-package de.int80.ics.sync.provider;
+package de.int80.ics.reader;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

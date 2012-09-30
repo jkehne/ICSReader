@@ -1,15 +1,15 @@
 <resources>
-    <string name="app_name">ICS sync provider</string>
-    <string name="ACCOUNT_TYPE">de.int80.ics.sync.provider.ICSCalendar</string>
+    <string name="app_name">ICSReader</string>
+    <string name="ACCOUNT_TYPE">de.int80.ics.reader.ICSCalendar</string>
     <string name="USERNAME_LABEL">User:</string>
     <string name="PASSWORD_LABEL">Password:</string>
     <string name="OKBUTTON_LABEL">OK</string>
     <string name="CANCELBUTTON_LABEL">Abbrechen</string>
     <string name="CALENDAR_NAME_LABEL">Calendar Name:</string><string name="SYNC_INTERVAL_LABEL">Sync interval:</string><string name="URL_LABEL">Calendar URL:</string>
-    <string name="URL_KEY">de.int80.ics.sync.provider.CalendarURL</string>
-    <string name="USERNAME_KEY">de.int80.ics.sync.provider.CalendarUserName</string>
+    <string name="URL_KEY">de.int80.ics.reader.CalendarURL</string>
+    <string name="USERNAME_KEY">de.int80.ics.reader.CalendarUserName</string>
     
-    <string name="CALENDAR_ID_KEY">de.int80.ics.sync.provider.CalendarID</string><string-array name="SYNC_INTERVAL_ARRAY">
+    <string name="CALENDAR_ID_KEY">de.int80.ics.reader.CalendarID</string><string-array name="SYNC_INTERVAL_ARRAY">
         <item>Nie</item><item >30 Sek</item>
         <item >1 Min</item>
         <item >2 Min</item>

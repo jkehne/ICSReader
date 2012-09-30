@@ -14,7 +14,7 @@
  * with ICSReader; if not, see http://www.gnu.org/licenses.
  */
 
-package de.int80.ics.sync.provider;
+package de.int80.ics.reader;
 
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
@@ -50,7 +50,7 @@ public class AccountAuthenticatorService extends Service {
 			Bundle reply = new Bundle();
 			
 			Intent i = new Intent(mContext, LoginScreen.class);
-			i.setAction("de.int80.ics.sync.provider.LOGIN");
+			i.setAction("de.int80.ics.reader.LOGIN");
 			i.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 			reply.putParcelable(AccountManager.KEY_INTENT, i);
 
