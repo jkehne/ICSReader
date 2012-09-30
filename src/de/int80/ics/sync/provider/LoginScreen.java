@@ -2,7 +2,6 @@ package de.int80.ics.sync.provider;
 
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
-import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.os.Bundle;
@@ -81,7 +80,7 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 				Bundle extras = new Bundle();
 				extras.putString(getString(R.string.USERNAME_KEY), username.getText().toString());
 				extras.putString(getString(R.string.URL_KEY), url.getText().toString());
-				extras.putLong(getString(R.string.CALENDAR_ID_KEY), handle.getCalID());
+				extras.putString(getString(R.string.CALENDAR_ID_KEY), String.valueOf(handle.getCalID()));
 				
 				am.addAccountExplicitly(account, password.getText().toString(), extras);
 

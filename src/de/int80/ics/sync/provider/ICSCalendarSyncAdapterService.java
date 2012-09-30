@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -16,6 +17,7 @@ import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.property.DateProperty;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -58,6 +60,9 @@ public class ICSCalendarSyncAdapterService extends Service {
 				Log.i(TAG, "Password is set");
 			else
 				Log.i(TAG, "Password is NOT set");
+			long calID = Long.valueOf(am.getUserData(account, CALENDAR_ID_KEY));
+			CalendarHandle calHandle = new CalendarHandle(mContext, calID, account.name, account.type);
+			
 			URL url;
 			try {
 				url = new URL(calendarURL);
@@ -112,11 +117,54 @@ public class ICSCalendarSyncAdapterService extends Service {
 			
 			for (Object entryObject : calendar.getComponents()) {
 				Component entry = (Component) entryObject;
-				Log.i(TAG, "Found entry: " + entry.getName());
-				for (Object propObject : entry.getProperties()) {
-					Property prop = (Property) propObject;
-					Log.i(TAG, "Found property: " + prop.getName() + " -> " + prop.getValue());
+				
+				//for now, we ignore anything that's not an event
+				if (! entry.getName().equals("VEVENT"))
+					continue;
+				
+				//now, get the event properties...
+				DateProperty startDate = (DateProperty) entry.getProperty("DTSTART");
+				if (startDate == null) {
+					Log.e(TAG, "Invalid event (DTSTART is null)");
+					syncResult.stats.numSkippedEntries++;
+					continue;
 				}
+				Date start = startDate.getDate();
+				
+				DateProperty endDate = (DateProperty) entry.getProperty("DTEND");
+				if (endDate == null) {
+					Log.e(TAG, "Invalid event (DTEND is null)");
+					syncResult.stats.numSkippedEntries++;
+					continue;
+				}
+				Date end = endDate.getDate();
+				
+				Property titleProp = entry.getProperty("SUMMARY");
+				if (titleProp == null) {
+					Log.e(TAG, "Invalid event (Event title is null)");
+					syncResult.stats.numSkippedEntries++;
+					continue;
+				}
+				String title = titleProp.getValue();
+				
+				//the remaining properties are optional, 
+				//so we need to expect and accept null values
+				Property descProp = entry.getProperty("DESCRIPTION");
+				String desc;
+				if (descProp == null)
+					desc = "";
+				else
+					desc = descProp.getValue();
+				
+				Property locProp = entry.getProperty("LOCATION");
+				String loc;
+				if (locProp == null)
+					loc = "";
+				else
+					loc = locProp.getValue();
+				
+				//... and insert the event into the android calendar
+				calHandle.insertEvent(start, end, title, desc, loc);
 			}
 		}
 
@@ -125,6 +173,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 	private static final String TAG = "ICSCalendarSyncAdapterService";
 	private static String CALENDAR_URL_KEY;
 	private static String USERNAME_KEY;
+	private static String CALENDAR_ID_KEY;
 	private static ICSCalendarSyncAdapterImpl sSyncAdapter;
 
 	public ICSCalendarSyncAdapterService() {
@@ -136,6 +185,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 			sSyncAdapter = new ICSCalendarSyncAdapterImpl(this);
 			CALENDAR_URL_KEY = getString(R.string.URL_KEY);
 			USERNAME_KEY = getString(R.string.USERNAME_KEY);
+			CALENDAR_ID_KEY = getString(R.string.CALENDAR_ID_KEY);
 		}
 		
 		return sSyncAdapter;
