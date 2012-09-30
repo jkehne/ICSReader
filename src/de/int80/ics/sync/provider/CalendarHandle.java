@@ -3,8 +3,10 @@ package de.int80.ics.sync.provider;
 import java.util.Date;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CalendarContract.Calendars;
 import android.provider.CalendarContract.Events;
@@ -15,6 +17,8 @@ public class CalendarHandle {
 	private String accountName;
 	private String accountType;
 	private Context mContext;
+	
+	private static final String TAG = "CalendarHandle";
 
 	private static Uri asSyncAdapter(Uri uri, String accountName, String accountType) {
 	    return uri.buildUpon()
@@ -58,6 +62,32 @@ public class CalendarHandle {
 		values.put(Events.DESCRIPTION, desc);
 		values.put(Events.CALENDAR_ID, calID);
 		values.put(Events.EVENT_TIMEZONE, "Europe/Berlin");
-		Uri uri = cr.insert(asSyncAdapter(Events.CONTENT_URI, accountName, accountType), values);
+		cr.insert(asSyncAdapter(Events.CONTENT_URI, accountName, accountType), values);
+	}
+	
+	public void deleteAllEvents() {
+		ContentResolver cr = mContext.getContentResolver();
+		Cursor cursor = cr.query(asSyncAdapter(Events.CONTENT_URI, accountName, accountType), 
+				new String[]{Events._ID}, null, null, null);
+		if (cursor.getCount() == 0)
+			return;
+		
+		cursor.moveToFirst();
+		while (! cursor.isAfterLast()) {
+			long eventID = cursor.getLong(cursor.getColumnIndex(Events._ID));
+			cr.delete(
+					asSyncAdapter(
+							ContentUris.withAppendedId(
+									Events.CONTENT_URI, 
+									eventID), 
+							accountName, 
+							accountType), 
+					null, 
+					null);
+			
+			cursor.moveToNext();
+		}
+		
+		cursor.close();
 	}
 }

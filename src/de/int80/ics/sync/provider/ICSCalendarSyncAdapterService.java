@@ -115,6 +115,9 @@ public class ICSCalendarSyncAdapterService extends Service {
 				return;
 			}
 			
+			//first, delete all events from the calendar, then re-insert them
+			calHandle.deleteAllEvents();
+			
 			for (Object entryObject : calendar.getComponents()) {
 				Component entry = (Component) entryObject;
 				
