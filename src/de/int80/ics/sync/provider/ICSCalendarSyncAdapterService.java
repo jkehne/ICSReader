@@ -3,8 +3,10 @@ package de.int80.ics.sync.provider;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -45,9 +47,17 @@ public class ICSCalendarSyncAdapterService extends Service {
 		public void onPerformSync(Account account, Bundle extras,
 				String authority, ContentProviderClient provider,
 				SyncResult syncResult) {
+			AccountManager am = AccountManager.get(ICSCalendarSyncAdapterService.this);
 			Log.i(TAG, "performSync: " + account.toString());
-			String calendarURL = AccountManager.get(ICSCalendarSyncAdapterService.this).getUserData(account, CALENDAR_URL_KEY);
+			String calendarURL = am.getUserData(account, CALENDAR_URL_KEY);
 			Log.i(TAG, "Calendar URL is " + calendarURL);
+			final String user = am.getUserData(account, USERNAME_KEY);
+			Log.i(TAG, "Username is '" + user + "'");
+			final String pass = am.getPassword(account);
+			if (! pass.equals(""))
+				Log.i(TAG, "Password is set");
+			else
+				Log.i(TAG, "Password is NOT set");
 			URL url;
 			try {
 				url = new URL(calendarURL);
@@ -55,6 +65,12 @@ public class ICSCalendarSyncAdapterService extends Service {
 				Log.e(TAG, "Malformed URL: " + calendarURL);
 				return;
 			}
+			
+			Authenticator.setDefault(new Authenticator() {
+				protected PasswordAuthentication getPasswordAuthentication() {
+					return new PasswordAuthentication(user, pass.toCharArray());
+				}
+			});
 
 			InputStream in;
 			try {
@@ -108,6 +124,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 
 	private static final String TAG = "ICSCalendarSyncAdapterService";
 	private static String CALENDAR_URL_KEY;
+	private static String USERNAME_KEY;
 	private static ICSCalendarSyncAdapterImpl sSyncAdapter;
 
 	public ICSCalendarSyncAdapterService() {
@@ -118,6 +135,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 		if (sSyncAdapter == null) {
 			sSyncAdapter = new ICSCalendarSyncAdapterImpl(this);
 			CALENDAR_URL_KEY = getString(R.string.URL_KEY);
+			USERNAME_KEY = getString(R.string.USERNAME_KEY);
 		}
 		
 		return sSyncAdapter;
