@@ -50,16 +50,16 @@ public class ICSCalendarSyncAdapterService extends Service {
 				String authority, ContentProviderClient provider,
 				SyncResult syncResult) {
 			AccountManager am = AccountManager.get(ICSCalendarSyncAdapterService.this);
-			Log.i(TAG, "performSync: " + account.toString());
+			Log.d(TAG, "performSync: " + account.toString());
 			String calendarURL = am.getUserData(account, CALENDAR_URL_KEY);
-			Log.i(TAG, "Calendar URL is " + calendarURL);
+			Log.d(TAG, "Calendar URL is " + calendarURL);
 			final String user = am.getUserData(account, USERNAME_KEY);
-			Log.i(TAG, "Username is '" + user + "'");
+			Log.d(TAG, "Username is '" + user + "'");
 			final String pass = am.getPassword(account);
 			if (! pass.equals(""))
-				Log.i(TAG, "Password is set");
+				Log.d(TAG, "Password is set");
 			else
-				Log.i(TAG, "Password is NOT set");
+				Log.d(TAG, "Password is NOT set");
 			long calID = Long.valueOf(am.getUserData(account, CALENDAR_ID_KEY));
 			CalendarHandle calHandle = new CalendarHandle(mContext, calID, account.name, account.type);
 			
