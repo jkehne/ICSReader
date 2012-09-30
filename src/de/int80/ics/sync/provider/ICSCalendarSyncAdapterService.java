@@ -1,5 +1,6 @@
 package de.int80.ics.sync.provider;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -59,10 +60,20 @@ public class ICSCalendarSyncAdapterService extends Service {
 			try {
 				if (calendarURL.startsWith("https://")) {
 					HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-					in = connection.getInputStream();
+					if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+						Log.e(TAG, "Failed to fetch calendar: Response code " + connection.getResponseCode());
+						syncResult.stats.numIoExceptions++;
+						return;
+					}
+					in = new BufferedInputStream(connection.getInputStream());
 				} else {
 					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-					in = connection.getInputStream();
+					if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+						Log.e(TAG, "Failed to fetch calendar: Response code " + connection.getResponseCode());
+						syncResult.stats.numIoExceptions++;
+						return;
+					}
+					in = new BufferedInputStream(connection.getInputStream());
 				}
 			} catch(IOException e) {
 				Log.e(TAG, "Failed to connect to " + calendarURL, e);
