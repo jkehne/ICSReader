@@ -33,6 +33,8 @@ public class CalendarHandle {
 	private String accountName;
 	private String accountType;
 	private Context mContext;
+	private static final Uri CALENDAR_URI = Uri.parse("content://com.android.calendar/calendars");
+	private static final Uri EVENTS_URI = Uri.parse("content://com.android.calendar/events");
 	
 	private static final String TAG = "CalendarHandle";
 
@@ -56,7 +58,7 @@ public class CalendarHandle {
 		values.put(Calendars.ACCOUNT_TYPE, type);
 		values.put(Calendars.CALENDAR_DISPLAY_NAME, name);
 		Uri ret = context.getContentResolver().insert(
-				asSyncAdapter(Calendars.CONTENT_URI, name, type), 
+				asSyncAdapter(CALENDAR_URI, name, type), 
 				values
 				);
 		calID = Long.parseLong(ret.getLastPathSegment());
@@ -78,12 +80,12 @@ public class CalendarHandle {
 		values.put(Events.DESCRIPTION, desc);
 		values.put(Events.CALENDAR_ID, calID);
 		values.put(Events.EVENT_TIMEZONE, "Europe/Berlin");
-		cr.insert(asSyncAdapter(Events.CONTENT_URI, accountName, accountType), values);
+		cr.insert(asSyncAdapter(EVENTS_URI, accountName, accountType), values);
 	}
 	
 	public void deleteAllEvents() {
 		ContentResolver cr = mContext.getContentResolver();
-		Cursor cursor = cr.query(asSyncAdapter(Events.CONTENT_URI, accountName, accountType), 
+		Cursor cursor = cr.query(asSyncAdapter(EVENTS_URI, accountName, accountType), 
 				new String[]{Events._ID}, null, null, null);
 		if (cursor.getCount() == 0)
 			return;
@@ -94,7 +96,7 @@ public class CalendarHandle {
 			cr.delete(
 					asSyncAdapter(
 							ContentUris.withAppendedId(
-									Events.CONTENT_URI, 
+									EVENTS_URI, 
 									eventID), 
 							accountName, 
 							accountType), 
