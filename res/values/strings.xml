@@ -10,7 +10,7 @@
     <string name="USERNAME_KEY">de.int80.ics.reader.CalendarUserName</string>
     
     <string name="CALENDAR_ID_KEY">de.int80.ics.reader.CalendarID</string><string-array name="SYNC_INTERVAL_ARRAY">
-        <item>Nie</item><item >30 Sek</item>
+        <item>Nie</item>
         <item >1 Min</item>
         <item >2 Min</item>
         <item >5 Min</item>
