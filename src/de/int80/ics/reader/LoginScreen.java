@@ -64,8 +64,10 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 			interval = 3600;
 			break;
 		}
-		if (interval > 0)
+		if (interval > 0) {
 			ContentResolver.addPeriodicSync(account, "com.android.calendar", extras, interval);
+			ContentResolver.setSyncAutomatically(account, "com.android.calendar", true);
+		}
 	}
 
 	@Override
@@ -100,7 +102,9 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 				
 				am.addAccountExplicitly(account, password.getText().toString(), extras);
 
+				ContentResolver.setIsSyncable(account, "com.android.calendar", 1);
 				setAutomaticSync(account, syncInterval.getSelectedItemPosition(), extras);
+				
 				
 				Bundle result = new Bundle();
 				result.putString(AccountManager.KEY_ACCOUNT_NAME, username.getText().toString());
