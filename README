@@ -13,6 +13,9 @@ Features:
 
 Limitations:
 * Currently, the configuration of existing calendars cannot be edited
+* Recurring events are not yet supported
+* All day events are assigned a start and end time. They may "leak"
+  into the next or previous day.
 * All calendars are assigned the same color
 
 Bugs:
