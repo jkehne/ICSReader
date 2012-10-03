@@ -14,7 +14,6 @@ Features:
 Limitations:
 * Currently, the configuration of existing calendars cannot be edited
 * Recurring events are not yet supported
-* All calendars are assigned the same color
 
 Bugs:
 ICSReader is NOT stable! You should not rely on it in a production 
