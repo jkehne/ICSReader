@@ -75,6 +75,8 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 		super.onCreate(icicle);
 		setContentView(R.layout.loginscreen);
 		
+		findViewById(R.id.calendarNameField).requestFocus(View.FOCUS_DOWN);
+		
 		Button okButton = (Button) findViewById(R.id.okButton);
 		okButton.setOnClickListener(new OnClickListener() {
 			
