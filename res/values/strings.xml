@@ -5,7 +5,7 @@
     <string name="PASSWORD_LABEL">Password:</string>
     <string name="OKBUTTON_LABEL">OK</string>
     <string name="CANCELBUTTON_LABEL">Abbrechen</string>
-    <string name="CALENDAR_NAME_LABEL">Calendar Name:</string><string name="SYNC_INTERVAL_LABEL">Sync interval:</string><string name="URL_LABEL">Calendar URL:</string>
+    <string name="CALENDAR_NAME_LABEL">Calendar Name:</string><string name="SYNC_INTERVAL_LABEL">Sync interval:</string><string name="COLOR_LABEL">Calendar color:</string><string name="CALENDARBUTTON_TEXT">Select</string><string name="URL_LABEL">Calendar URL:</string>
     <string name="URL_KEY">de.int80.ics.reader.CalendarURL</string>
     <string name="USERNAME_KEY">de.int80.ics.reader.CalendarUserName</string>
     
@@ -21,6 +21,8 @@
         <item >1 Std</item>
         
     </string-array>
+    
+    
     
     
 </resources>

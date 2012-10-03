@@ -23,3 +23,9 @@ appointments, crashing devices or any other negative consequences that
 may arise from using this app!
 If you encounter any bugs, please use GitHub's bug tracking system to 
 report them.
+
+Acknowledgements:
+This project includes the Android Color Picker aka AmbilWarna library 
+("Pick a Color" in Indonesian). AmbilWarna was released under the
+Apache License 2.0. Its source code can be obtained here:
+https://github.com/brk3/android-color-picker

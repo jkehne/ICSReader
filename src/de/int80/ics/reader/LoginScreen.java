@@ -16,6 +16,8 @@
 
 package de.int80.ics.reader;
 
+import yuku.ambilwarna.AmbilWarnaDialog;
+import yuku.ambilwarna.AmbilWarnaDialog.OnAmbilWarnaListener;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
@@ -29,6 +31,8 @@ import android.widget.Spinner;
 
 public class LoginScreen extends AccountAuthenticatorActivity {
 
+	private int color = 0;
+	
 	public LoginScreen() {
 		// TODO Auto-generated constructor stub
 	}
@@ -95,7 +99,8 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 				CalendarHandle handle = new CalendarHandle(
 						LoginScreen.this, 
 						calendarName.getText().toString(), 
-						getString(R.string.ACCOUNT_TYPE));
+						getString(R.string.ACCOUNT_TYPE), 
+						color);
 				
 				Bundle extras = new Bundle();
 				extras.putString(getString(R.string.USERNAME_KEY), username.getText().toString());
@@ -122,6 +127,33 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 			@Override
 			public void onClick(View v) {
 				finish();
+			}
+		});
+		
+		Button colorSelector = (Button) findViewById(R.id.colorPickerButton);
+		colorSelector.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// initialColor is the initially-selected color to be shown 
+			    // in the rectangle on the left of the arrow.
+			    // for example, 0xff000000 is black, 0xff0000ff is blue. 
+			    // Please be aware of the initial 0xff which is the alpha.
+			    AmbilWarnaDialog dialog = new AmbilWarnaDialog(LoginScreen.this, 0xff000000,
+			            new OnAmbilWarnaListener() {
+			        @Override
+			        public void onOk(AmbilWarnaDialog dialog, int color) {
+			                // color is the color selected by the user.
+			        	LoginScreen.this.color = color;
+			        }
+			                
+			        @Override
+			        public void onCancel(AmbilWarnaDialog dialog) {
+			                // cancel was selected by the user, ignore
+			        }
+			    });
+
+			    dialog.show();		
 			}
 		});
 	}

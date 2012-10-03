@@ -52,11 +52,12 @@ public class CalendarHandle {
 		this.mContext = context;
 	}
 
-	public CalendarHandle(Context context, String name, String type) {
+	public CalendarHandle(Context context, String name, String type, int color) {
 		ContentValues values = new ContentValues();
 		values.put(Calendars.ACCOUNT_NAME, name);
 		values.put(Calendars.ACCOUNT_TYPE, type);
 		values.put(Calendars.CALENDAR_DISPLAY_NAME, name);
+		values.put(Calendars.CALENDAR_COLOR, color);
 		Uri ret = context.getContentResolver().insert(
 				asSyncAdapter(CALENDAR_URI, name, type), 
 				values
