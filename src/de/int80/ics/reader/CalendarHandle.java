@@ -71,15 +71,16 @@ public class CalendarHandle {
 		return calID;
 	}
 	
-	public void insertEvent(Date start, Date end, String title, String desc, String loc) {
+	public void insertEvent(Date start, Date end, String title, String desc, String loc, boolean allDay) {
 		ContentResolver cr = mContext.getContentResolver();
 		ContentValues values = new ContentValues();
 		values.put(Events.DTSTART, start.getTime());
-		values.put(Events.DTEND, end.getTime());
+		values.put(Events.DTEND, end != null ? end.getTime() : start.getTime());
 		values.put(Events.TITLE, title);
 		values.put(Events.DESCRIPTION, desc);
 		values.put(Events.CALENDAR_ID, calID);
 		values.put(Events.EVENT_TIMEZONE, "Europe/Berlin");
+		values.put(Events.ALL_DAY, allDay ? 1 : 0);
 		cr.insert(asSyncAdapter(EVENTS_URI, accountName, accountType), values);
 	}
 	

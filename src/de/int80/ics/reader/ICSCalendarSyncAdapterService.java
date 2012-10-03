@@ -32,7 +32,9 @@ import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.property.DateProperty;
 
 import android.accounts.Account;
@@ -134,6 +136,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 			//first, delete all events from the calendar, then re-insert them
 			calHandle.deleteAllEvents();
 			
+			boolean allDay;
 			for (Object entryObject : calendar.getComponents()) {
 				Component entry = (Component) entryObject;
 				
@@ -149,14 +152,20 @@ public class ICSCalendarSyncAdapterService extends Service {
 					continue;
 				}
 				Date start = startDate.getDate();
+				Parameter param = startDate.getParameter("VALUE");
+				if (param != null)
+					allDay = param.getValue().equals(Value.DATE.getValue());
+				else
+					allDay = false;
 				
 				DateProperty endDate = (DateProperty) entry.getProperty("DTEND");
+				Date end;
 				if (endDate == null) {
-					Log.e(TAG, "Invalid event (DTEND is null)");
-					syncResult.stats.numSkippedEntries++;
-					continue;
-				}
-				Date end = endDate.getDate();
+					Log.e(TAG, "Invalid event (DTEND is null). Assuming all-day event.");
+					allDay = true;
+					end = null;
+				} else
+					end = endDate.getDate();
 				
 				Property titleProp = entry.getProperty("SUMMARY");
 				if (titleProp == null) {
@@ -183,7 +192,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 					loc = locProp.getValue();
 				
 				//... and insert the event into the android calendar
-				calHandle.insertEvent(start, end, title, desc, loc);
+				calHandle.insertEvent(start, end, title, desc, loc, allDay);
 			}
 		}
 
