@@ -24,6 +24,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 public class CalendarHandle {
 	
@@ -35,7 +36,9 @@ public class CalendarHandle {
 	private static final Uri EVENTS_URI = Uri.parse("content://com.android.calendar/events");
 	private static final String ACCOUNT_NAME = "account_name";
 	private static final String ACCOUNT_TYPE = "account_type";
+	private static final String CALENDAR_ID = "calendar_id";
 	private static final String EVENT_ID = "_id";
+	private static final String SYNC_TIMESTAMP = "cal_sync1";
 	
 	private static final String TAG = "CalendarHandle";
 
@@ -73,6 +76,42 @@ public class CalendarHandle {
 		return calID;
 	}
 	
+	public long getLastSyncTime() {
+		ContentResolver cr = mContext.getContentResolver();
+		Cursor cursor = cr.query(asSyncAdapter(CALENDAR_URI, accountName, accountType), 
+				new String[]{SYNC_TIMESTAMP}, null, null, null);
+		if (cursor.getCount() == 0) {
+			cursor.close();
+			return 0;
+		}
+		cursor.moveToFirst();
+		String timestamp = cursor.getString(cursor.getColumnIndex(SYNC_TIMESTAMP));
+		cursor.close();
+		if (timestamp == null)
+			return 0;
+		return Long.parseLong(timestamp);
+	}
+	
+	public void updateLastSyncTime() {
+		ContentResolver cr = mContext.getContentResolver();
+		ContentValues values = new ContentValues();
+		//set last sync to current time - 30 sec. Otherwise, if an event
+		//is inserted right after downloading, the next sync might not
+		//catch it.
+		long timestamp = System.currentTimeMillis() - 30000;
+		values.put(SYNC_TIMESTAMP, String.valueOf(timestamp));
+		cr.update(
+				asSyncAdapter(
+						ContentUris.withAppendedId(
+								CALENDAR_URI, 
+								calID), 
+						accountName, 
+						accountType), 
+				values,
+				null,
+				null);
+	}
+	
 	public void insertEvent(Date start, Date end, String title, String desc, String loc, boolean allDay) {
 		ContentResolver cr = mContext.getContentResolver();
 		ContentValues values = new ContentValues();
@@ -80,7 +119,7 @@ public class CalendarHandle {
 		values.put("dtend", end != null ? end.getTime() : start.getTime());
 		values.put("title", title);
 		values.put("description", desc);
-		values.put("calendar_id", calID);
+		values.put(CALENDAR_ID, calID);
 		values.put("eventTimezone", "Europe/Berlin");
 		values.put("allDay", allDay ? 1 : 0);
 		cr.insert(asSyncAdapter(EVENTS_URI, accountName, accountType), values);

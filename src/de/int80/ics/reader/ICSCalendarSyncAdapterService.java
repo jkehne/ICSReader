@@ -95,10 +95,16 @@ public class ICSCalendarSyncAdapterService extends Service {
 				}
 			});
 
+			long lastSync = calHandle.getLastSyncTime();
 			InputStream in;
 			try {
 				if (calendarURL.startsWith("https://")) {
 					HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+					connection.setIfModifiedSince(lastSync);
+					if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
+						Log.d(TAG, "Calendar was not modified since last sync");
+						return;
+					}
 					if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
 						Log.e(TAG, "Failed to fetch calendar: Response code " + connection.getResponseCode());
 						syncResult.stats.numIoExceptions++;
@@ -107,6 +113,11 @@ public class ICSCalendarSyncAdapterService extends Service {
 					in = new BufferedInputStream(connection.getInputStream());
 				} else {
 					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+					connection.setIfModifiedSince(lastSync);
+					if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
+						Log.i(TAG, "Calendar was not modified since last sync");
+						return;
+					}
 					if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
 						Log.e(TAG, "Failed to fetch calendar: Response code " + connection.getResponseCode());
 						syncResult.stats.numIoExceptions++;
@@ -194,6 +205,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 				//... and insert the event into the android calendar
 				calHandle.insertEvent(start, end, title, desc, loc, allDay);
 			}
+			calHandle.updateLastSyncTime();
 		}
 
 	}
