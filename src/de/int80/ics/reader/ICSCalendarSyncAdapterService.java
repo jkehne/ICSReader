@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLHandshakeException;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -42,6 +43,7 @@ import android.accounts.AccountManager;
 import android.app.Service;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SyncResult;
@@ -96,31 +98,71 @@ public class ICSCalendarSyncAdapterService extends Service {
 			});
 
 			long lastSync = calHandle.getLastSyncTime();
+			String errMsg = null;
 			InputStream in;
 			try {
 				if (calendarURL.startsWith("https://")) {
 					HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 					connection.setIfModifiedSince(lastSync);
-					if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
+					
+					int responseCode;
+					try {
+					responseCode = connection.getResponseCode();
+					switch (responseCode) {
+					case HttpURLConnection.HTTP_OK:
+						//this is what we want
+						break;
+					case HttpURLConnection.HTTP_NOT_MODIFIED:
 						Log.d(TAG, "Calendar was not modified since last sync");
 						return;
+					case HttpURLConnection.HTTP_NOT_FOUND:
+						errMsg = "Calendar file not found!";
+						break;
+					case HttpURLConnection.HTTP_UNAUTHORIZED:
+						errMsg = "Login Failed!";
+						break;
+					default:
+						errMsg = "Server returned error code " + responseCode;
+						break;
 					}
-					if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-						Log.e(TAG, "Failed to fetch calendar: Response code " + connection.getResponseCode());
-						syncResult.stats.numIoExceptions++;
+					} catch (SSLHandshakeException e) {
+						errMsg = "Server certificate verification failed!";
+					}
+					
+					if (errMsg != null) {
+						Log.e(TAG, errMsg);
+						ContentResolver.removePeriodicSync(account, "com.android.calendar", extras);
+						ContentResolver.setSyncAutomatically(account, "com.android.calendar", false);
 						return;
 					}
+					
 					in = new BufferedInputStream(connection.getInputStream());
 				} else {
 					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 					connection.setIfModifiedSince(lastSync);
-					if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
-						Log.i(TAG, "Calendar was not modified since last sync");
+					
+					int responseCode = connection.getResponseCode();
+					switch (responseCode) {
+					case HttpURLConnection.HTTP_OK:
+						//this is what we want
+						break;
+					case HttpURLConnection.HTTP_NOT_MODIFIED:
+						Log.d(TAG, "Calendar was not modified since last sync");
 						return;
+					case HttpURLConnection.HTTP_NOT_FOUND:
+						errMsg = "Calendar file not found!";
+						break;
+					case HttpURLConnection.HTTP_UNAUTHORIZED:
+						errMsg = "Login Failed!";
+						break;
+					default:
+						errMsg = "Server returned error code " + responseCode;
+						break;
 					}
-					if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-						Log.e(TAG, "Failed to fetch calendar: Response code " + connection.getResponseCode());
-						syncResult.stats.numIoExceptions++;
+
+					if (errMsg != null) {
+						Log.e(TAG, errMsg);
+						ContentResolver.setIsSyncable(account, "com.android.calendar", 0);
 						return;
 					}
 					in = new BufferedInputStream(connection.getInputStream());
