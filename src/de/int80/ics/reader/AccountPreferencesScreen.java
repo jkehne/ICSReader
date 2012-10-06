@@ -24,6 +24,7 @@ public class AccountPreferencesScreen extends Activity {
 	PeriodicSync sync;
 	CalendarHandle calHandle;
 	Account account;
+	private static final String TAG = "AccountPreferencesScreen";
 	
 	private static int intervalToIndex(long interval) {
 		int index = 0;
@@ -99,13 +100,16 @@ public class AccountPreferencesScreen extends Activity {
 	
 	private void setAutomaticSync(Account account, int intervalIndex, Bundle extras) {
 		long interval = indexToInterval(intervalIndex);
+
+		List<PeriodicSync> syncsList = ContentResolver.getPeriodicSyncs(account, "com.android.calendar");
+		for (PeriodicSync sync : syncsList)
+			ContentResolver.removePeriodicSync(sync.account, sync.authority, sync.extras);
+		
 		if (interval > 0) {
 			ContentResolver.addPeriodicSync(account, "com.android.calendar", extras, interval);
 			ContentResolver.setSyncAutomatically(account, "com.android.calendar", true);
-		} else {
-			ContentResolver.removePeriodicSync(account, "com.android.calendar", extras);
+		} else
 			ContentResolver.setSyncAutomatically(account, "com.android.calendar", false);
-		}
 	}
 
 	@Override
@@ -170,7 +174,6 @@ public class AccountPreferencesScreen extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				EditText calendarName = (EditText) findViewById(R.id.calendarNameField);
 				EditText username = (EditText) findViewById(R.id.userNameField);
 				EditText password = (EditText) findViewById(R.id.passwordField);
 				EditText url = (EditText) findViewById(R.id.calendarURLField);

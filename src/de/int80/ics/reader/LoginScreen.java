@@ -16,12 +16,15 @@
 
 package de.int80.ics.reader;
 
+import java.util.List;
+
 import yuku.ambilwarna.AmbilWarnaDialog;
 import yuku.ambilwarna.AmbilWarnaDialog.OnAmbilWarnaListener;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.ContentResolver;
+import android.content.PeriodicSync;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -68,6 +71,9 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 			interval = 3600;
 			break;
 		}
+		List<PeriodicSync> syncsList = ContentResolver.getPeriodicSyncs(account, "com.android.calendar");
+		for (PeriodicSync sync : syncsList)
+			ContentResolver.removePeriodicSync(sync.account, sync.authority, sync.extras);
 		if (interval > 0) {
 			ContentResolver.addPeriodicSync(account, "com.android.calendar", extras, interval);
 			ContentResolver.setSyncAutomatically(account, "com.android.calendar", true);
