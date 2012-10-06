@@ -26,7 +26,7 @@
                 android:resource="@xml/account_authenticator"/>
         </service>
         <activity android:name="LoginScreen"></activity>
-        <service android:process=":calendar" android:name="ICSCalendarSyncAdapterService" android:exported="true">
+        <service android:process=":sync" android:name="ICSCalendarSyncAdapterService" android:exported="true">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter"/>
             </intent-filter>
