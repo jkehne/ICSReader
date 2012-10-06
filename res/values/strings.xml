@@ -1,29 +1,28 @@
 <resources>
     <string name="app_name">ICSReader</string>
     <string name="ACCOUNT_TYPE">de.int80.ics.reader.ICSCalendar</string>
+    <string name="CALENDAR_NAME_LABEL">Calendar Name:</string>
+    <string name="URL_LABEL">Calendar URL:</string>
     <string name="USERNAME_LABEL">User:</string>
     <string name="PASSWORD_LABEL">Password:</string>
+    <string name="SYNC_INTERVAL_LABEL">Sync interval:</string>
+    <string name="COLOR_LABEL">Calendar color:</string>
+    <string name="CALENDARBUTTON_TEXT">Select</string>
     <string name="OKBUTTON_LABEL">OK</string>
-    <string name="CANCELBUTTON_LABEL">Abbrechen</string>
-    <string name="CALENDAR_NAME_LABEL">Calendar Name:</string><string name="SYNC_INTERVAL_LABEL">Sync interval:</string><string name="COLOR_LABEL">Calendar color:</string><string name="CALENDARBUTTON_TEXT">Select</string><string name="URL_LABEL">Calendar URL:</string>
+    <string name="CANCELBUTTON_LABEL">Cancel</string>
     <string name="URL_KEY">de.int80.ics.reader.CalendarURL</string>
     <string name="USERNAME_KEY">de.int80.ics.reader.CalendarUserName</string>
-    
-    <string name="CALENDAR_ID_KEY">de.int80.ics.reader.CalendarID</string><string name="CALENDAR_ACCOUNT_KEY">de.int80.ics.reader.CalendarAccount</string><string-array name="SYNC_INTERVAL_ARRAY">
-        <item>Nie</item>
-        <item >1 Min</item>
-        <item >2 Min</item>
-        <item >5 Min</item>
-        <item >10 Min</item>
-        <item >15 Min</item>
-        <item >30 Min</item>
-        <item >45 Min</item>
-        <item >1 Std</item>
-        
+    <string name="CALENDAR_ID_KEY">de.int80.ics.reader.CalendarID</string>
+    <string name="CALENDAR_ACCOUNT_KEY">de.int80.ics.reader.CalendarAccount</string>
+    <string-array name="SYNC_INTERVAL_ARRAY">
+        <item>Manual only</item>
+        <item >1 min</item>
+        <item >2 min</item>
+        <item >5 min</item>
+        <item >10 min</item>
+        <item >15 min</item>
+        <item >30 min</item>
+        <item >45 min</item>
+        <item >1 hr</item>
     </string-array>
-    
-    
-    
-    
-    
 </resources>
