@@ -12,7 +12,6 @@ Features:
 * SSL support
 
 Limitations:
-* Currently, the configuration of existing calendars cannot be edited
 * Recurring events are not yet supported
 
 Bugs:
