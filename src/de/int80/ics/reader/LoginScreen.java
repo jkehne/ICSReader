@@ -93,6 +93,13 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 				EditText url = (EditText) findViewById(R.id.calendarURLField);
 				Spinner syncInterval = (Spinner) findViewById(R.id.syncIntervalField);
 
+				if (! CalendarHandle.checkCredentials(
+						LoginScreen.this, 
+						url.getText().toString(), 
+						username.getText().toString(), 
+						password.getText().toString()))
+					return;
+				
 				Account account = new Account(calendarName.getText().toString(), getString(R.string.ACCOUNT_TYPE));
 				AccountManager am = AccountManager.get(LoginScreen.this);
 				

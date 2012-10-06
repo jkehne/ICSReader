@@ -16,15 +16,31 @@
 
 package de.int80.ics.reader;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
+import java.net.URL;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLHandshakeException;
+
+import net.fortuna.ical4j.data.CalendarBuilder;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
+import android.os.AsyncTask;
 
 public class CalendarHandle {
 	
@@ -41,6 +57,145 @@ public class CalendarHandle {
 	private static final String SYNC_TIMESTAMP = "cal_sync1";
 	
 	private static final String TAG = "CalendarHandle";
+	
+	public static class CredentialsChecker extends AsyncTask<String, Integer, String> {
+
+		@Override
+		protected String doInBackground(String... params) {
+			URL url = null;
+			String errMsg = null;
+			final String calendarUrl = params[0];
+			final String user = params[1];
+			final String password = params[2];
+			InputStream in = null;
+
+			try {
+				url = new URL(calendarUrl);
+			} catch (MalformedURLException e) {
+				errMsg = "The calendar's URL is invalid. Please correct it and try again.";
+			}
+
+			if (errMsg == null) {
+				Authenticator.setDefault(new Authenticator() {
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(user, password.toCharArray());
+					}
+				});
+
+				try {
+					if (calendarUrl.startsWith("https://")) {
+						HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+
+						int responseCode;
+						try {
+							responseCode = connection.getResponseCode();
+							switch (responseCode) {
+							case HttpURLConnection.HTTP_OK:
+								//this is what we want
+								break;
+							case HttpURLConnection.HTTP_NOT_FOUND:
+								errMsg = "The specified calendar file was not found by " +
+										"the server. Make sure the calendar URL is " +
+										"correct.";
+								break;
+							case HttpURLConnection.HTTP_UNAUTHORIZED:
+								errMsg = "Login to the server failed. Make sure the user " +
+										"name and password you entered are correct.";
+								break;
+							default:
+								errMsg = "Server returned error code " + responseCode + 
+								". Please contact the server administrator.";
+								break;
+							}
+							
+							if (errMsg == null)
+								in = new BufferedInputStream(connection.getInputStream());
+						} catch (SSLHandshakeException e) {
+							errMsg = "The server certificate could not be verified. " +
+									"Please install the appropriate CA certificate " +
+									"and try again.";
+						}
+					} else {
+						HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+						int responseCode = connection.getResponseCode();
+						switch (responseCode) {
+						case HttpURLConnection.HTTP_OK:
+							//this is what we want
+							break;
+						case HttpURLConnection.HTTP_NOT_FOUND:
+							errMsg = "The specified calendar file was not found by " +
+									"the server. Make sure the calendar URL is " +
+									"correct.";
+							break;
+						case HttpURLConnection.HTTP_UNAUTHORIZED:
+							errMsg = "Login to the server failed. Make sure the user " +
+									"name and password you entered are correct.";
+							break;
+						default:
+							errMsg = "Server returned error code " + responseCode + 
+							". Please contact the server administrator.";
+							break;
+						}
+						
+						if (errMsg == null)
+							in = new BufferedInputStream(connection.getInputStream());
+					}
+					
+					if (errMsg == null) {
+						try {
+							new CalendarBuilder().build(in);
+						} catch (Exception e) {
+							errMsg = "The specified URL does not point to a valid " +
+									"ICS file. Make sure the URL is correct";
+						}
+					}
+					
+				} catch(Exception e) {
+					errMsg = "An unexpected error occured while connecting to the " +
+							"server: " + e.toString();
+				}
+			}
+			return errMsg;
+		}
+	}
+	
+	public static boolean checkCredentials(Context context, String calendarUrl, String user, String password) {
+		CredentialsChecker checker = new CredentialsChecker();
+		checker.execute(calendarUrl, user, password);
+		String errMsg = null;
+		boolean retry = true;
+		
+		while (retry) {
+			try {
+				retry = false;
+				errMsg = checker.get(30, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				retry = true;
+			} catch (ExecutionException e) {
+				errMsg = "An unexpected error occured while connecting to the " +
+						"calendar: " + e.toString();
+			} catch (TimeoutException e) {
+				errMsg = "A timeout occurred while verifying the credentials " +
+						"you entered. Make sure the calendar URL is correct.";
+				checker.cancel(true);
+			}
+		}
+		
+		if (errMsg != null) {
+			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
+			alertBuilder.setTitle("Error!");
+			alertBuilder.setMessage(errMsg);
+			alertBuilder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		               // User clicked OK button
+		           }
+		       });
+			alertBuilder.create().show();
+		}
+		return errMsg == null;
+
+	}
 
 	private static Uri asSyncAdapter(Uri uri, String accountName, String accountType) {
 	    return uri.buildUpon()
