@@ -55,6 +55,7 @@ public class CalendarHandle {
 	private static final String CALENDAR_ID = "calendar_id";
 	private static final String EVENT_ID = "_id";
 	private static final String SYNC_TIMESTAMP = "cal_sync1";
+	private static final String CALENDAR_COLOR = "calendar_color";
 	
 	private static final String TAG = "CalendarHandle";
 	
@@ -216,7 +217,7 @@ public class CalendarHandle {
 		values.put(ACCOUNT_NAME, name);
 		values.put(ACCOUNT_TYPE, type);
 		values.put("calendar_displayName", name);
-		values.put("calendar_color", color);
+		values.put(CALENDAR_COLOR, color);
 		Uri ret = context.getContentResolver().insert(
 				asSyncAdapter(CALENDAR_URI, name, type), 
 				values
@@ -229,6 +230,39 @@ public class CalendarHandle {
 
 	public long getCalID() {
 		return calID;
+	}
+	
+	public int getColor() {
+		Cursor cursor = mContext.getContentResolver().query(
+				asSyncAdapter(CALENDAR_URI, accountName, accountType), 
+				new String[]{CALENDAR_COLOR}, 
+				null, 
+				null, 
+				null);
+		if (cursor.getCount() == 0) {
+			cursor.close();
+			return 0xff000000;
+		}
+		cursor.moveToFirst();
+		int color = cursor.getInt(cursor.getColumnIndex(CALENDAR_COLOR));
+		cursor.close();
+		return color;
+	}
+	
+	public void setColor(int color) {
+		ContentValues values = new ContentValues();
+		values.put(CALENDAR_COLOR, String.valueOf(color));
+
+		mContext.getContentResolver().update(
+				asSyncAdapter(
+						ContentUris.withAppendedId(
+								CALENDAR_URI, 
+								calID), 
+						accountName, 
+						accountType), 
+				values,
+				null,
+				null);
 	}
 	
 	public long getLastSyncTime() {

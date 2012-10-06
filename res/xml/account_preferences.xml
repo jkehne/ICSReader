@@ -4,11 +4,11 @@
 
     <PreferenceScreen
         android:key="account_settings"
-        android:summary="Sync frequency, notifications, etc."
+        android:summary="Sync frequency, username, password, etc."
         android:title="Account Settings" >
         <intent
-            android:action="de.int80.ics.reader.Preferences.ACCOUNT_SETUP"
-            android:targetClass="de.int80.ics.reader.Preferences"
+            android:action="de.int80.ics.reader.AccountLister.LIST"
+            android:targetClass="de.int80.ics.reader.AccountLister"
             android:targetPackage="de.int80.ics.reader" />
     </PreferenceScreen>
 

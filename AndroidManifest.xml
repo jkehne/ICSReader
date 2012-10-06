@@ -32,6 +32,8 @@
             </intent-filter>
             <meta-data android:name="android.content.SyncAdapter" android:resource="@xml/sync_calendar"/>
         </service>
+        <activity android:name="AccountLister"></activity>
+        <activity android:name="AccountPreferencesScreen"></activity>
         
     </application>
 

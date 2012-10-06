@@ -9,7 +9,7 @@
     <string name="URL_KEY">de.int80.ics.reader.CalendarURL</string>
     <string name="USERNAME_KEY">de.int80.ics.reader.CalendarUserName</string>
     
-    <string name="CALENDAR_ID_KEY">de.int80.ics.reader.CalendarID</string><string-array name="SYNC_INTERVAL_ARRAY">
+    <string name="CALENDAR_ID_KEY">de.int80.ics.reader.CalendarID</string><string name="CALENDAR_ACCOUNT_KEY">de.int80.ics.reader.CalendarAccount</string><string-array name="SYNC_INTERVAL_ARRAY">
         <item>Nie</item>
         <item >1 Min</item>
         <item >2 Min</item>
@@ -21,6 +21,7 @@
         <item >1 Std</item>
         
     </string-array>
+    
     
     
     
