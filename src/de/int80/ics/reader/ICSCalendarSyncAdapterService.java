@@ -19,10 +19,8 @@ package de.int80.ics.reader;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.Date;
 
@@ -49,6 +47,7 @@ import android.content.Intent;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Base64;
 import android.util.Log;
 
 public class ICSCalendarSyncAdapterService extends Service {
@@ -91,11 +90,11 @@ public class ICSCalendarSyncAdapterService extends Service {
 				return;
 			}
 			
-			Authenticator.setDefault(new Authenticator() {
-				protected PasswordAuthentication getPasswordAuthentication() {
-					return new PasswordAuthentication(user, pass.toCharArray());
-				}
-			});
+			String userpass = null;
+			if (user != null && user.length() > 0)
+				userpass = user;
+			if (pass != null && pass.length() > 0)
+				userpass += ":" + pass;
 
 			long lastSync = calHandle.getLastSyncTime();
 			String errMsg = null;
@@ -104,6 +103,8 @@ public class ICSCalendarSyncAdapterService extends Service {
 				if (calendarURL.startsWith("https://")) {
 					HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 					connection.setIfModifiedSince(lastSync);
+					connection.setRequestProperty("Authorization", "Basic " +
+					        Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
 					
 					int responseCode;
 					try {
@@ -140,7 +141,9 @@ public class ICSCalendarSyncAdapterService extends Service {
 				} else {
 					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 					connection.setIfModifiedSince(lastSync);
-					
+					connection.setRequestProperty("Authorization", "Basic " +
+					        Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
+										
 					int responseCode = connection.getResponseCode();
 					switch (responseCode) {
 					case HttpURLConnection.HTTP_OK:

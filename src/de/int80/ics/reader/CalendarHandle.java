@@ -18,10 +18,8 @@ package de.int80.ics.reader;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
@@ -41,6 +39,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Base64;
 
 public class CalendarHandle {
 	
@@ -73,6 +72,7 @@ public class CalendarHandle {
 	public static class CredentialsChecker extends AsyncTask<String, Integer, String> {
 
 		private Context mContext;
+		private static final String TAG = "CredentialsChecker";
 		
 		public CredentialsChecker(Context context) {
 			mContext = context;
@@ -94,16 +94,20 @@ public class CalendarHandle {
 			}
 
 			if (errMsg == null) {
-				Authenticator.setDefault(new Authenticator() {
-					protected PasswordAuthentication getPasswordAuthentication() {
-						return new PasswordAuthentication(user, password.toCharArray());
-					}
-				});
+
+				String userpass = null;
+				if (user != null && user.length() > 0)
+					userpass = user;
+				if (password != null && password.length() > 0)
+					userpass += ":" + password;
 
 				try {
 					if (calendarUrl.startsWith("https://")) {
 						HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-
+						
+						connection.setRequestProperty("Authorization", "Basic " +
+						        Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
+						
 						int responseCode;
 						try {
 							responseCode = connection.getResponseCode();
@@ -131,6 +135,9 @@ public class CalendarHandle {
 					} else {
 						HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
+						connection.setRequestProperty("Authorization", "Basic " +
+						        Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
+						
 						int responseCode = connection.getResponseCode();
 						switch (responseCode) {
 						case HttpURLConnection.HTTP_OK:
