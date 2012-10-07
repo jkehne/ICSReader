@@ -19,9 +19,11 @@ package de.int80.ics.reader;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -81,7 +83,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 				Log.d(TAG, "Password is NOT set");
 			long calID = Long.valueOf(am.getUserData(account, CALENDAR_ID_KEY));
 			CalendarHandle calHandle = new CalendarHandle(mContext, calID, account.name, account.type);
-			
+
 			URL url;
 			try {
 				url = new URL(calendarURL);
@@ -89,7 +91,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 				Log.e(TAG, "Malformed URL: " + calendarURL);
 				return;
 			}
-			
+
 			String userpass = null;
 			if (user != null && user.length() > 0)
 				userpass = user;
@@ -99,86 +101,61 @@ public class ICSCalendarSyncAdapterService extends Service {
 			long lastSync = calHandle.getLastSyncTime();
 			String errMsg = null;
 			InputStream in;
+			int responseCode;
+			URLConnection connection;
+			Calendar calendar;
+
 			try {
 				if (calendarURL.startsWith("https://")) {
-					HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+					connection = (HttpsURLConnection) url.openConnection();
 					connection.setIfModifiedSince(lastSync);
 					connection.setRequestProperty("Authorization", "Basic " +
-					        Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
-					
-					int responseCode;
-					try {
-					responseCode = connection.getResponseCode();
-					switch (responseCode) {
-					case HttpURLConnection.HTTP_OK:
-						//this is what we want
-						break;
-					case HttpURLConnection.HTTP_NOT_MODIFIED:
-						Log.d(TAG, "Calendar was not modified since last sync");
-						return;
-					case HttpURLConnection.HTTP_NOT_FOUND:
-						errMsg = "Calendar file not found!";
-						break;
-					case HttpURLConnection.HTTP_UNAUTHORIZED:
-						errMsg = "Login Failed!";
-						break;
-					default:
-						errMsg = "Server returned error code " + responseCode;
-						break;
-					}
-					} catch (SSLHandshakeException e) {
-						errMsg = "Server certificate verification failed!";
-					}
-					
-					if (errMsg != null) {
-						Log.e(TAG, errMsg);
-						ContentResolver.removePeriodicSync(account, CALENDAR_AUTHORITY, extras);
-						ContentResolver.setSyncAutomatically(account, CALENDAR_AUTHORITY, false);
-						return;
-					}
-					
-					in = new BufferedInputStream(connection.getInputStream());
-				} else {
-					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-					connection.setIfModifiedSince(lastSync);
-					connection.setRequestProperty("Authorization", "Basic " +
-					        Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
-										
-					int responseCode = connection.getResponseCode();
-					switch (responseCode) {
-					case HttpURLConnection.HTTP_OK:
-						//this is what we want
-						break;
-					case HttpURLConnection.HTTP_NOT_MODIFIED:
-						Log.d(TAG, "Calendar was not modified since last sync");
-						return;
-					case HttpURLConnection.HTTP_NOT_FOUND:
-						errMsg = "Calendar file not found!";
-						break;
-					case HttpURLConnection.HTTP_UNAUTHORIZED:
-						errMsg = "Login Failed!";
-						break;
-					default:
-						errMsg = "Server returned error code " + responseCode;
-						break;
-					}
+							Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
 
-					if (errMsg != null) {
-						Log.e(TAG, errMsg);
-						ContentResolver.setIsSyncable(account, CALENDAR_AUTHORITY, 0);
-						return;
-					}
-					in = new BufferedInputStream(connection.getInputStream());
+					responseCode = ((HttpsURLConnection)connection).getResponseCode();
+				} else {
+					connection = (HttpURLConnection) url.openConnection();
+					connection.setIfModifiedSince(lastSync);
+					connection.setRequestProperty("Authorization", "Basic " +
+							Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
+
+					responseCode = ((HttpURLConnection)connection).getResponseCode();
 				}
-			} catch(IOException e) {
-				Log.e(TAG, "Failed to connect to " + calendarURL, e);
+				switch (responseCode) {
+				case HttpURLConnection.HTTP_OK:
+					//this is what we want
+					break;
+				case HttpURLConnection.HTTP_NOT_MODIFIED:
+					Log.d(TAG, "Calendar was not modified since last sync");
+					return;
+				case HttpURLConnection.HTTP_NOT_FOUND:
+					errMsg = "Calendar file not found!";
+					break;
+				case HttpURLConnection.HTTP_UNAUTHORIZED:
+					errMsg = "Login Failed!";
+					break;
+				default:
+					errMsg = "Server returned error code " + responseCode;
+					break;
+				}
+
+				if (errMsg != null) {
+					Log.e(TAG, errMsg);
+					ContentResolver.removePeriodicSync(account, CALENDAR_AUTHORITY, extras);
+					ContentResolver.setSyncAutomatically(account, CALENDAR_AUTHORITY, false);
+					return;
+				}
+				in = new BufferedInputStream(connection.getInputStream());
+
+				calendar = calendarBuilder.build(in);
+			} catch (ConnectException e) {
+				Log.e(TAG, "Failed to connect to server");
 				syncResult.stats.numIoExceptions++;
 				return;
-			}
-			
-			Calendar calendar;
-			try {
-				calendar = calendarBuilder.build(in);
+			} catch (SSLHandshakeException e) {
+				Log.e(TAG, "Server certificate verification failed!");
+				syncResult.stats.numIoExceptions++;
+				return;
 			} catch (IOException e) {
 				Log.e(TAG, "Failed to download calendar " + calendarURL, e);
 				syncResult.stats.numIoExceptions++;
@@ -188,18 +165,18 @@ public class ICSCalendarSyncAdapterService extends Service {
 				syncResult.stats.numParseExceptions++;
 				return;
 			}
-			
+
 			//first, delete all events from the calendar, then re-insert them
 			calHandle.deleteAllEvents();
-			
+
 			boolean allDay;
 			for (Object entryObject : calendar.getComponents()) {
 				Component entry = (Component) entryObject;
-				
+
 				//for now, we ignore anything that's not an event
 				if (! entry.getName().equals("VEVENT"))
 					continue;
-				
+
 				//now, get the event properties...
 				DateProperty startDate = (DateProperty) entry.getProperty("DTSTART");
 				if (startDate == null) {
@@ -213,7 +190,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 					allDay = param.getValue().equals(Value.DATE.getValue());
 				else
 					allDay = false;
-				
+
 				DateProperty endDate = (DateProperty) entry.getProperty("DTEND");
 				Date end;
 				if (endDate == null) {
@@ -222,7 +199,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 					end = null;
 				} else
 					end = endDate.getDate();
-				
+
 				Property titleProp = entry.getProperty("SUMMARY");
 				if (titleProp == null) {
 					Log.e(TAG, "Invalid event (Event title is null)");
@@ -230,7 +207,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 					continue;
 				}
 				String title = titleProp.getValue();
-				
+
 				//the remaining properties are optional, 
 				//so we need to expect and accept null values
 				Property descProp = entry.getProperty("DESCRIPTION");
@@ -239,14 +216,14 @@ public class ICSCalendarSyncAdapterService extends Service {
 					desc = "";
 				else
 					desc = descProp.getValue();
-				
+
 				Property locProp = entry.getProperty("LOCATION");
 				String loc;
 				if (locProp == null)
 					loc = "";
 				else
 					loc = locProp.getValue();
-				
+
 				//... and insert the event into the android calendar
 				calHandle.insertEvent(start, end, title, desc, loc, allDay);
 			}

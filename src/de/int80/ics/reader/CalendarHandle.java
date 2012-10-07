@@ -18,9 +18,11 @@ package de.int80.ics.reader;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -102,62 +104,41 @@ public class CalendarHandle {
 					userpass += ":" + password;
 
 				try {
+					int responseCode;
+					URLConnection connection;
 					if (calendarUrl.startsWith("https://")) {
-						HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+						connection = (HttpsURLConnection) url.openConnection();
 						
 						connection.setRequestProperty("Authorization", "Basic " +
 						        Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
-						
-						int responseCode;
-						try {
-							responseCode = connection.getResponseCode();
-							switch (responseCode) {
-							case HttpURLConnection.HTTP_OK:
-								//this is what we want
-								break;
-							case HttpURLConnection.HTTP_NOT_FOUND:
-								errMsg = mContext.getString(R.string.HTTP_NOT_FOUND_ERROR);
-								break;
-							case HttpURLConnection.HTTP_UNAUTHORIZED:
-								errMsg = mContext.getString(R.string.HTTP_UNAUTHORIZED_ERROR);
-								break;
-							default:
-								errMsg = mContext.getString(R.string.HTTP_UNKNOWN_ERROR,
-										responseCode);
-								break;
-							}
-							
-							if (errMsg == null)
-								in = new BufferedInputStream(connection.getInputStream());
-						} catch (SSLHandshakeException e) {
-							errMsg = mContext.getString(R.string.INVALID_CERT_ERROR);
-						}
+
+						responseCode = ((HttpsURLConnection)connection).getResponseCode();
 					} else {
-						HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+						connection = (HttpURLConnection) url.openConnection();
 
 						connection.setRequestProperty("Authorization", "Basic " +
 						        Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
 						
-						int responseCode = connection.getResponseCode();
-						switch (responseCode) {
-						case HttpURLConnection.HTTP_OK:
-							//this is what we want
-							break;
-						case HttpURLConnection.HTTP_NOT_FOUND:
-							errMsg = mContext.getString(R.string.HTTP_NOT_FOUND_ERROR);
-							break;
-						case HttpURLConnection.HTTP_UNAUTHORIZED:
-							errMsg = mContext.getString(R.string.HTTP_UNAUTHORIZED_ERROR);
-							break;
-						default:
-							errMsg = mContext.getString(R.string.HTTP_UNKNOWN_ERROR, 
-									responseCode);
-							break;
-						}
-						
-						if (errMsg == null)
-							in = new BufferedInputStream(connection.getInputStream());
+						responseCode = ((HttpURLConnection)connection).getResponseCode();
 					}
+					switch (responseCode) {
+					case HttpURLConnection.HTTP_OK:
+						//this is what we want
+						break;
+					case HttpURLConnection.HTTP_NOT_FOUND:
+						errMsg = mContext.getString(R.string.HTTP_NOT_FOUND_ERROR);
+						break;
+					case HttpURLConnection.HTTP_UNAUTHORIZED:
+						errMsg = mContext.getString(R.string.HTTP_UNAUTHORIZED_ERROR);
+						break;
+					default:
+						errMsg = mContext.getString(R.string.HTTP_UNKNOWN_ERROR, 
+								responseCode);
+						break;
+					}
+						
+					if (errMsg == null)
+						in = new BufferedInputStream(connection.getInputStream());
 					
 					if (errMsg == null) {
 						try {
@@ -167,6 +148,10 @@ public class CalendarHandle {
 						}
 					}
 					
+				} catch (SSLHandshakeException e) {
+					errMsg = mContext.getString(R.string.INVALID_CERT_ERROR);
+				} catch(ConnectException e) {
+					errMsg = mContext.getString(R.string.CONNECTION_REFUSED_ERROR);
 				} catch(Exception e) {
 					errMsg = mContext.getString(R.string.UNEXPECTED_ERROR, e.toString());
 				}

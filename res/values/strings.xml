@@ -16,11 +16,12 @@
     <string name="UNEXPECTED_ERROR">An unexpected error occured while connecting to the calendar: %s</string>
     <string name="TIMEOUT_ERROR">A timeout occurred while verifying the credentials you entered. Make sure the calendar URL is correct.</string>
     <string name="INVALID_URL_ERROR">The calendar URL is invalid. Please correct it and try again.</string>
-    <string name="HTTP_NOT_FOUND_ERROR">The specified calendar file was not found by the server. Make sure the calendar URL is correct.</string>
+    <string name="CONNECTION_REFUSED_ERROR">Connecting to the server failed. Make sure the URL is correct.</string>
+    <string name="HTTP_NOT_FOUND_ERROR">The specified calendar file was not found by the server. Make sure the URL is correct.</string>
     <string name="HTTP_UNAUTHORIZED_ERROR">Login to the server failed. Make sure the user name and password you entered are correct.</string>
     <string name="HTTP_UNKNOWN_ERROR">Server returned error code %d. Please contact the server administrator.</string>
     <string name="INVALID_CERT_ERROR">The server certificate could not be verified. Please install the appropriate CA certificate and try again.</string>
-    <string name="INVALID_ICS_FILE_ERROR">The specified URL does not point to a valid ICS file. Make sure the URL is correct</string>
+    <string name="INVALID_ICS_FILE_ERROR">The specified URL does not point to a valid ICS file. Make sure the URL is correct.</string>
     
     <!-- Internal constants -->
     <string name="ACCOUNT_TYPE">de.int80.ics.reader.ICSCalendar</string>
