@@ -2,8 +2,8 @@ ICSReader is a synchronization provider which periodically downloads
 calendars in ICS format from the internet and inserts their contents
 into the Android calendar.
 
-After installing, you can configure your calendar via settings ->
-add accounts.
+After installing, you can configure your calendars via settings ->
+add accounts (settings -> accounts and sync on older devices).
 
 Features:
 * Supports multiple calendars
