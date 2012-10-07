@@ -168,8 +168,9 @@ public class ICSCalendarSyncAdapterService extends Service {
 			}
 
 			//first, delete all events from the calendar, then re-insert them
-			calHandle.deleteAllEvents();
-
+			syncResult.stats.numDeletes = calHandle.deleteAllEvents();
+			syncResult.stats.numEntries = syncResult.stats.numDeletes;
+			
 			boolean allDay;
 			for (Object entryObject : calendar.getComponents()) {
 				Component entry = (Component) entryObject;
@@ -227,6 +228,8 @@ public class ICSCalendarSyncAdapterService extends Service {
 
 				//... and insert the event into the android calendar
 				calHandle.insertEvent(start, end, title, desc, loc, allDay);
+				syncResult.stats.numInserts++;
+				syncResult.stats.numEntries++;
 			}
 			calHandle.updateLastSyncTime(timestamp);
 		}

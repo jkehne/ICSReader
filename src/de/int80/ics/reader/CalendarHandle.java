@@ -315,12 +315,15 @@ public class CalendarHandle {
 		cr.insert(asSyncAdapter(EVENTS_URI, accountName, accountType), values);
 	}
 	
-	public void deleteAllEvents() {
+	public int deleteAllEvents() {
 		ContentResolver cr = mContext.getContentResolver();
 		Cursor cursor = cr.query(asSyncAdapter(EVENTS_URI, accountName, accountType), 
 				new String[]{EVENT_ID}, null, null, null);
-		if (cursor.getCount() == 0)
-			return;
+		if (cursor.getCount() == 0) {
+			cursor.close();
+			return 0;
+		}
+		int ret = cursor.getCount();
 		
 		cursor.moveToFirst();
 		while (! cursor.isAfterLast()) {
@@ -339,5 +342,6 @@ public class CalendarHandle {
 		}
 		
 		cursor.close();
+		return ret;
 	}
 }
