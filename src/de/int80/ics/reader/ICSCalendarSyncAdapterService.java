@@ -131,8 +131,8 @@ public class ICSCalendarSyncAdapterService extends Service {
 					
 					if (errMsg != null) {
 						Log.e(TAG, errMsg);
-						ContentResolver.removePeriodicSync(account, "com.android.calendar", extras);
-						ContentResolver.setSyncAutomatically(account, "com.android.calendar", false);
+						ContentResolver.removePeriodicSync(account, CALENDAR_AUTHORITY, extras);
+						ContentResolver.setSyncAutomatically(account, CALENDAR_AUTHORITY, false);
 						return;
 					}
 					
@@ -162,7 +162,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 
 					if (errMsg != null) {
 						Log.e(TAG, errMsg);
-						ContentResolver.setIsSyncable(account, "com.android.calendar", 0);
+						ContentResolver.setIsSyncable(account, CALENDAR_AUTHORITY, 0);
 						return;
 					}
 					in = new BufferedInputStream(connection.getInputStream());
@@ -253,13 +253,17 @@ public class ICSCalendarSyncAdapterService extends Service {
 	}
 
 	private static final String TAG = "ICSCalendarSyncAdapterService";
+	private String CALENDAR_AUTHORITY;
+	
 	private static String CALENDAR_URL_KEY;
 	private static String USERNAME_KEY;
 	private static String CALENDAR_ID_KEY;
 	private static ICSCalendarSyncAdapterImpl sSyncAdapter;
 
-	public ICSCalendarSyncAdapterService() {
-		super();
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		CALENDAR_AUTHORITY = getString(R.string.CALENDAR_AUTHORITY);
 	}
 
 	private ICSCalendarSyncAdapterImpl getSyncAdapter() {

@@ -15,10 +15,6 @@ public class AccountLister extends ListActivity {
 
 	private ArrayList<Account> accountList;
 	
-	public AccountLister() {
-		// TODO Auto-generated constructor stub
-	}
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

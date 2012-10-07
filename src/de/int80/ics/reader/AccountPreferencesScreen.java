@@ -25,6 +25,7 @@ public class AccountPreferencesScreen extends Activity {
 	CalendarHandle calHandle;
 	Account account;
 	private static final String TAG = "AccountPreferencesScreen";
+	private String CALENDAR_AUTHORITY;
 	
 	private static int intervalToIndex(long interval) {
 		int index = 0;
@@ -94,28 +95,25 @@ public class AccountPreferencesScreen extends Activity {
 		return interval;
 	}
 	
-	public AccountPreferencesScreen() {
-		// TODO Auto-generated constructor stub
-	}
-	
 	private void setAutomaticSync(Account account, int intervalIndex, Bundle extras) {
 		long interval = indexToInterval(intervalIndex);
 
-		List<PeriodicSync> syncsList = ContentResolver.getPeriodicSyncs(account, "com.android.calendar");
+		List<PeriodicSync> syncsList = ContentResolver.getPeriodicSyncs(account, CALENDAR_AUTHORITY);
 		for (PeriodicSync sync : syncsList)
 			ContentResolver.removePeriodicSync(sync.account, sync.authority, sync.extras);
 		
 		if (interval > 0) {
-			ContentResolver.addPeriodicSync(account, "com.android.calendar", extras, interval);
-			ContentResolver.setSyncAutomatically(account, "com.android.calendar", true);
+			ContentResolver.addPeriodicSync(account, CALENDAR_AUTHORITY, extras, interval);
+			ContentResolver.setSyncAutomatically(account, CALENDAR_AUTHORITY, true);
 		} else
-			ContentResolver.setSyncAutomatically(account, "com.android.calendar", false);
+			ContentResolver.setSyncAutomatically(account, CALENDAR_AUTHORITY, false);
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.preferencesscreen);
+		CALENDAR_AUTHORITY = getString(R.string.CALENDAR_AUTHORITY);
 		
 		account = getIntent().getExtras().getParcelable(getString(R.string.CALENDAR_ACCOUNT_KEY));
 		AccountManager am = AccountManager.get(this);
@@ -136,8 +134,8 @@ public class AccountPreferencesScreen extends Activity {
 		password.setText(am.getPassword(account));
 		
 		Spinner syncInterval = (Spinner) findViewById(R.id.syncIntervalField);
-		List<PeriodicSync> syncsList = ContentResolver.getPeriodicSyncs(account, "com.android.calendar");
-		sync = syncsList.size() > 0 ? syncsList.get(0) : new PeriodicSync(account, "com.android.calendar", new Bundle(), 0);
+		List<PeriodicSync> syncsList = ContentResolver.getPeriodicSyncs(account, CALENDAR_AUTHORITY);
+		sync = syncsList.size() > 0 ? syncsList.get(0) : new PeriodicSync(account, CALENDAR_AUTHORITY, new Bundle(), 0);
 		syncInterval.setSelection(intervalToIndex(sync.period));
 		
 		color = calHandle.getColor();

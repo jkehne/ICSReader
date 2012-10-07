@@ -34,11 +34,9 @@ import android.widget.Spinner;
 
 public class LoginScreen extends AccountAuthenticatorActivity {
 
-	private int color = 0;
+	private String CALENDAR_AUTHORITY;
 	
-	public LoginScreen() {
-		// TODO Auto-generated constructor stub
-	}
+	private int color = 0;
 	
 	private void setAutomaticSync(Account account, int intervalIndex, Bundle extras) {
 		int interval = 0;
@@ -71,12 +69,12 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 			interval = 3600;
 			break;
 		}
-		List<PeriodicSync> syncsList = ContentResolver.getPeriodicSyncs(account, "com.android.calendar");
+		List<PeriodicSync> syncsList = ContentResolver.getPeriodicSyncs(account, CALENDAR_AUTHORITY);
 		for (PeriodicSync sync : syncsList)
 			ContentResolver.removePeriodicSync(sync.account, sync.authority, sync.extras);
 		if (interval > 0) {
-			ContentResolver.addPeriodicSync(account, "com.android.calendar", extras, interval);
-			ContentResolver.setSyncAutomatically(account, "com.android.calendar", true);
+			ContentResolver.addPeriodicSync(account, CALENDAR_AUTHORITY, extras, interval);
+			ContentResolver.setSyncAutomatically(account, CALENDAR_AUTHORITY, true);
 		}
 	}
 
@@ -84,6 +82,7 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 	protected void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		setContentView(R.layout.loginscreen);
+		CALENDAR_AUTHORITY = getString(R.string.CALENDAR_AUTHORITY);
 		
 		findViewById(R.id.calendarNameField).requestFocus(View.FOCUS_DOWN);
 		
@@ -122,7 +121,7 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 				
 				am.addAccountExplicitly(account, password.getText().toString(), extras);
 
-				ContentResolver.setIsSyncable(account, "com.android.calendar", 1);
+				ContentResolver.setIsSyncable(account, CALENDAR_AUTHORITY, 1);
 				setAutomaticSync(account, syncInterval.getSelectedItemPosition(), extras);
 				
 				

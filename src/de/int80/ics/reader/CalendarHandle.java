@@ -48,19 +48,36 @@ public class CalendarHandle {
 	private String accountName;
 	private String accountType;
 	private Context mContext;
-	private static final Uri CALENDAR_URI = Uri.parse("content://com.android.calendar/calendars");
-	private static final Uri EVENTS_URI = Uri.parse("content://com.android.calendar/events");
+
+	private final Uri CALENDAR_URI;
+	private final Uri EVENTS_URI;
+	
+	//calendar DB field names
 	private static final String ACCOUNT_NAME = "account_name";
 	private static final String ACCOUNT_TYPE = "account_type";
 	private static final String CALENDAR_ID = "calendar_id";
 	private static final String EVENT_ID = "_id";
 	private static final String SYNC_TIMESTAMP = "cal_sync1";
 	private static final String CALENDAR_COLOR = "calendar_color";
+	private static final String DTSTART = "dtstart";
+	private static final String DTEND = "dtend";
+	private static final String TITLE = "title";
+	private static final String DESCRIPTION = "description";
+	private static final String TIMEZONE = "eventTimezone";
+	private static final String ALLDAY = "allDay";
+	private static final String DISPLAYNAME = "calendar_displayName";
+	private static final String IS_SYNCADAPTER = "caller_is_syncadapter";
 	
 	private static final String TAG = "CalendarHandle";
 	
 	public static class CredentialsChecker extends AsyncTask<String, Integer, String> {
 
+		private Context mContext;
+		
+		public CredentialsChecker(Context context) {
+			mContext = context;
+		}
+		
 		@Override
 		protected String doInBackground(String... params) {
 			URL url = null;
@@ -73,7 +90,7 @@ public class CalendarHandle {
 			try {
 				url = new URL(calendarUrl);
 			} catch (MalformedURLException e) {
-				errMsg = "The calendar's URL is invalid. Please correct it and try again.";
+				errMsg = mContext.getString(R.string.INVALID_URL_ERROR);
 			}
 
 			if (errMsg == null) {
@@ -95,26 +112,21 @@ public class CalendarHandle {
 								//this is what we want
 								break;
 							case HttpURLConnection.HTTP_NOT_FOUND:
-								errMsg = "The specified calendar file was not found by " +
-										"the server. Make sure the calendar URL is " +
-										"correct.";
+								errMsg = mContext.getString(R.string.HTTP_NOT_FOUND_ERROR);
 								break;
 							case HttpURLConnection.HTTP_UNAUTHORIZED:
-								errMsg = "Login to the server failed. Make sure the user " +
-										"name and password you entered are correct.";
+								errMsg = mContext.getString(R.string.HTTP_UNAUTHORIZED_ERROR);
 								break;
 							default:
-								errMsg = "Server returned error code " + responseCode + 
-								". Please contact the server administrator.";
+								errMsg = mContext.getString(R.string.HTTP_UNKNOWN_ERROR,
+										responseCode);
 								break;
 							}
 							
 							if (errMsg == null)
 								in = new BufferedInputStream(connection.getInputStream());
 						} catch (SSLHandshakeException e) {
-							errMsg = "The server certificate could not be verified. " +
-									"Please install the appropriate CA certificate " +
-									"and try again.";
+							errMsg = mContext.getString(R.string.INVALID_CERT_ERROR);
 						}
 					} else {
 						HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -125,17 +137,14 @@ public class CalendarHandle {
 							//this is what we want
 							break;
 						case HttpURLConnection.HTTP_NOT_FOUND:
-							errMsg = "The specified calendar file was not found by " +
-									"the server. Make sure the calendar URL is " +
-									"correct.";
+							errMsg = mContext.getString(R.string.HTTP_NOT_FOUND_ERROR);
 							break;
 						case HttpURLConnection.HTTP_UNAUTHORIZED:
-							errMsg = "Login to the server failed. Make sure the user " +
-									"name and password you entered are correct.";
+							errMsg = mContext.getString(R.string.HTTP_UNAUTHORIZED_ERROR);
 							break;
 						default:
-							errMsg = "Server returned error code " + responseCode + 
-							". Please contact the server administrator.";
+							errMsg = mContext.getString(R.string.HTTP_UNKNOWN_ERROR, 
+									responseCode);
 							break;
 						}
 						
@@ -147,14 +156,12 @@ public class CalendarHandle {
 						try {
 							new CalendarBuilder().build(in);
 						} catch (Exception e) {
-							errMsg = "The specified URL does not point to a valid " +
-									"ICS file. Make sure the URL is correct";
+							errMsg = mContext.getString(R.string.INVALID_ICS_FILE_ERROR);
 						}
 					}
 					
 				} catch(Exception e) {
-					errMsg = "An unexpected error occured while connecting to the " +
-							"server: " + e.toString();
+					errMsg = mContext.getString(R.string.UNEXPECTED_ERROR, e.toString());
 				}
 			}
 			return errMsg;
@@ -162,7 +169,7 @@ public class CalendarHandle {
 	}
 	
 	public static boolean checkCredentials(Context context, String calendarUrl, String user, String password) {
-		CredentialsChecker checker = new CredentialsChecker();
+		CredentialsChecker checker = new CredentialsChecker(context);
 		checker.execute(calendarUrl, user, password);
 		String errMsg = null;
 		boolean retry = true;
@@ -174,20 +181,19 @@ public class CalendarHandle {
 			} catch (InterruptedException e) {
 				retry = true;
 			} catch (ExecutionException e) {
-				errMsg = "An unexpected error occured while connecting to the " +
-						"calendar: " + e.toString();
+				errMsg = context.getString(R.string.UNEXPECTED_ERROR, e.toString());
 			} catch (TimeoutException e) {
-				errMsg = "A timeout occurred while verifying the credentials " +
-						"you entered. Make sure the calendar URL is correct.";
+				errMsg = context.getString(R.string.TIMEOUT_ERROR);
 				checker.cancel(true);
 			}
 		}
 		
 		if (errMsg != null) {
 			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context);
-			alertBuilder.setTitle("Error!");
+			alertBuilder.setTitle(context.getString(R.string.ERROR));
 			alertBuilder.setMessage(errMsg);
-			alertBuilder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+			alertBuilder.setNeutralButton(context.getString(R.string.OKBUTTON_LABEL), 
+					new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		               // User clicked OK button
 		           }
@@ -200,12 +206,15 @@ public class CalendarHandle {
 
 	private static Uri asSyncAdapter(Uri uri, String accountName, String accountType) {
 	    return uri.buildUpon()
-	        .appendQueryParameter("caller_is_syncadapter","true")
+	        .appendQueryParameter(IS_SYNCADAPTER,"true")
 	        .appendQueryParameter(ACCOUNT_NAME, accountName)
 	        .appendQueryParameter(ACCOUNT_TYPE, accountType).build();
 	 }
 	
 	public CalendarHandle(Context context, long calID, String name, String type) {
+		CALENDAR_URI = Uri.parse(context.getString(R.string.CALENDAR_URI));
+		EVENTS_URI = Uri.parse(context.getString(R.string.EVENTS_URI));
+
 		this.calID = calID;
 		this.accountName = name;
 		this.accountType = type;
@@ -213,10 +222,13 @@ public class CalendarHandle {
 	}
 
 	public CalendarHandle(Context context, String name, String type, int color) {
+		CALENDAR_URI = Uri.parse(context.getString(R.string.CALENDAR_URI));
+		EVENTS_URI = Uri.parse(context.getString(R.string.EVENTS_URI));
+
 		ContentValues values = new ContentValues();
 		values.put(ACCOUNT_NAME, name);
 		values.put(ACCOUNT_TYPE, type);
-		values.put("calendar_displayName", name);
+		values.put(DISPLAYNAME, name);
 		values.put(CALENDAR_COLOR, color);
 		Uri ret = context.getContentResolver().insert(
 				asSyncAdapter(CALENDAR_URI, name, type), 
@@ -304,13 +316,13 @@ public class CalendarHandle {
 	public void insertEvent(Date start, Date end, String title, String desc, String loc, boolean allDay) {
 		ContentResolver cr = mContext.getContentResolver();
 		ContentValues values = new ContentValues();
-		values.put("dtstart", start.getTime());
-		values.put("dtend", end != null ? end.getTime() : start.getTime());
-		values.put("title", title);
-		values.put("description", desc);
+		values.put(DTSTART, start.getTime());
+		values.put(DTEND, end != null ? end.getTime() : start.getTime());
+		values.put(TITLE, title);
+		values.put(DESCRIPTION, desc);
 		values.put(CALENDAR_ID, calID);
-		values.put("eventTimezone", "Europe/Berlin");
-		values.put("allDay", allDay ? 1 : 0);
+		values.put(TIMEZONE, "Europe/Berlin");
+		values.put(ALLDAY, allDay ? 1 : 0);
 		cr.insert(asSyncAdapter(EVENTS_URI, accountName, accountType), values);
 	}
 	
