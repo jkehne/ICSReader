@@ -99,6 +99,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 				userpass += ":" + pass;
 
 			long lastSync = calHandle.getLastSyncTime();
+			long timestamp = System.currentTimeMillis();
 			String errMsg = null;
 			InputStream in;
 			int responseCode;
@@ -227,7 +228,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 				//... and insert the event into the android calendar
 				calHandle.insertEvent(start, end, title, desc, loc, allDay);
 			}
-			calHandle.updateLastSyncTime();
+			calHandle.updateLastSyncTime(timestamp);
 		}
 
 	}

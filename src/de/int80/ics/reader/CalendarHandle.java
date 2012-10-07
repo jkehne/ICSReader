@@ -285,13 +285,10 @@ public class CalendarHandle {
 		return Long.parseLong(timestamp);
 	}
 	
-	public void updateLastSyncTime() {
+	public void updateLastSyncTime(long timestamp) {
 		ContentResolver cr = mContext.getContentResolver();
 		ContentValues values = new ContentValues();
-		//set last sync to current time - 30 sec. Otherwise, if an event
-		//is inserted right after downloading, the next sync might not
-		//catch it.
-		long timestamp = System.currentTimeMillis() - 30000;
+
 		values.put(SYNC_TIMESTAMP, String.valueOf(timestamp));
 		cr.update(
 				asSyncAdapter(
