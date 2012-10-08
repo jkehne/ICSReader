@@ -89,6 +89,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 				url = new URL(calendarURL);
 			} catch (MalformedURLException e) {
 				Log.e(TAG, "Malformed URL: " + calendarURL);
+				syncResult.stats.numAuthExceptions++;
 				return;
 			}
 
@@ -126,12 +127,15 @@ public class ICSCalendarSyncAdapterService extends Service {
 					return;
 				case HttpURLConnection.HTTP_NOT_FOUND:
 					errMsg = "Calendar file not found!";
+					syncResult.stats.numIoExceptions++;
 					break;
 				case HttpURLConnection.HTTP_UNAUTHORIZED:
 					errMsg = "Login Failed!";
+					syncResult.stats.numAuthExceptions++;
 					break;
 				default:
 					errMsg = "Server returned error code " + responseCode;
+					syncResult.stats.numIoExceptions++;
 					break;
 				}
 
