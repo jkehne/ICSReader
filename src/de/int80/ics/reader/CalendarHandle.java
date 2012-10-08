@@ -137,16 +137,16 @@ public class CalendarHandle {
 						break;
 					}
 						
-					if (errMsg == null)
-						in = new BufferedInputStream(connection.getInputStream());
-					
-					if (errMsg == null) {
-						try {
-							new CalendarBuilder().build(in);
-						} catch (Exception e) {
-							errMsg = mContext.getString(R.string.INVALID_ICS_FILE_ERROR);
-						}
-					}
+//					if (errMsg == null)
+//						in = new BufferedInputStream(connection.getInputStream());
+//					
+//					if (errMsg == null) {
+//						try {
+//							new CalendarBuilder().build(in);
+//						} catch (Exception e) {
+//							errMsg = mContext.getString(R.string.INVALID_ICS_FILE_ERROR);
+//						}
+//					}
 					
 				} catch (SSLHandshakeException e) {
 					errMsg = mContext.getString(R.string.INVALID_CERT_ERROR);
