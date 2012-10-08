@@ -103,25 +103,20 @@ public class ICSCalendarSyncAdapterService extends Service {
 			String errMsg = null;
 			InputStream in;
 			int responseCode;
-			URLConnection connection;
+			HttpURLConnection connection;
 			Calendar calendar;
 
 			try {
 				if (calendarURL.startsWith("https://")) {
 					connection = (HttpsURLConnection) url.openConnection();
-					connection.setIfModifiedSince(lastSync);
-					connection.setRequestProperty("Authorization", "Basic " +
-							Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
-
-					responseCode = ((HttpsURLConnection)connection).getResponseCode();
 				} else {
 					connection = (HttpURLConnection) url.openConnection();
-					connection.setIfModifiedSince(lastSync);
-					connection.setRequestProperty("Authorization", "Basic " +
-							Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
-
-					responseCode = ((HttpURLConnection)connection).getResponseCode();
 				}
+				connection.setIfModifiedSince(lastSync);
+				connection.setRequestProperty("Authorization", "Basic " +
+						Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
+
+				responseCode = connection.getResponseCode();
 				switch (responseCode) {
 				case HttpURLConnection.HTTP_OK:
 					//this is what we want

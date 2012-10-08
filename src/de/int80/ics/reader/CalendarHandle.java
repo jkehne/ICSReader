@@ -105,22 +105,18 @@ public class CalendarHandle {
 
 				try {
 					int responseCode;
-					URLConnection connection;
+					HttpURLConnection connection;
 					if (calendarUrl.startsWith("https://")) {
-						connection = (HttpsURLConnection) url.openConnection();
-						
-						connection.setRequestProperty("Authorization", "Basic " +
-						        Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
-
-						responseCode = ((HttpsURLConnection)connection).getResponseCode();
+						connection = (HttpsURLConnection) url.openConnection();						
 					} else {
 						connection = (HttpURLConnection) url.openConnection();
-
-						connection.setRequestProperty("Authorization", "Basic " +
-						        Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
-						
-						responseCode = ((HttpURLConnection)connection).getResponseCode();
 					}
+					connection.setRequestProperty("Authorization", "Basic " +
+							Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
+						
+					responseCode = connection.getResponseCode();
+					//connection.disconnect();
+					
 					switch (responseCode) {
 					case HttpURLConnection.HTTP_OK:
 						//this is what we want
