@@ -68,6 +68,21 @@ public class LoginScreen extends AccountAuthenticatorActivity {
 		case 8:
 			interval = 3600;
 			break;
+		case 9:
+			interval = 7200;
+			break;
+		case 10:
+			interval = 10800;
+			break;
+		case 11:
+			interval = 21600;
+			break;
+		case 12:
+			interval = 43200;
+			break;
+		case 13:
+			interval = 86400;
+			break;
 		}
 		List<PeriodicSync> syncsList = ContentResolver.getPeriodicSyncs(account, CALENDAR_AUTHORITY);
 		for (PeriodicSync sync : syncsList)

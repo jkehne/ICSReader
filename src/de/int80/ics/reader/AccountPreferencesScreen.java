@@ -57,6 +57,21 @@ public class AccountPreferencesScreen extends Activity {
 		case 3600:
 			index = 8;
 			break;
+		case 7200:
+			index = 9;
+			break;
+		case 10800:
+			index = 10;
+			break;
+		case 21600:
+			index = 11;
+			break;
+		case 43200:
+			index = 12;
+			break;
+		case 86400:
+			index = 13;
+			break;
 		}
 		return index;
 	}
@@ -90,6 +105,21 @@ public class AccountPreferencesScreen extends Activity {
 			break;
 		case 8:
 			interval = 3600;
+			break;
+		case 9:
+			interval = 7200;
+			break;
+		case 10:
+			interval = 10800;
+			break;
+		case 11:
+			interval = 21600;
+			break;
+		case 12:
+			interval = 43200;
+			break;
+		case 13:
+			interval = 86400;
 			break;
 		}
 		return interval;
