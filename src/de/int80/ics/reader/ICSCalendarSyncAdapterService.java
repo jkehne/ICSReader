@@ -141,8 +141,6 @@ public class ICSCalendarSyncAdapterService extends Service {
 
 				if (errMsg != null) {
 					Log.e(TAG, errMsg);
-					ContentResolver.removePeriodicSync(account, CALENDAR_AUTHORITY, extras);
-					ContentResolver.setSyncAutomatically(account, CALENDAR_AUTHORITY, false);
 					return;
 				}
 				in = new BufferedInputStream(connection.getInputStream());
