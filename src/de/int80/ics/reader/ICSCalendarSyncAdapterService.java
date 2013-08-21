@@ -17,15 +17,14 @@
 package de.int80.ics.reader;
 
 import java.io.BufferedInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Date;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
 
@@ -35,15 +34,16 @@ import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.ExDate;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Service;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SyncResult;
@@ -105,7 +105,7 @@ public class ICSCalendarSyncAdapterService extends Service {
 			InputStream in;
 			int responseCode;
 			HttpURLConnection connection;
-			Calendar calendar;
+			Calendar calendar = null;
 
 			try {
 				if (calendarURL.startsWith("https://")) {
@@ -154,6 +154,11 @@ public class ICSCalendarSyncAdapterService extends Service {
 				Log.e(TAG, "Server certificate verification failed!");
 				syncResult.stats.numIoExceptions++;
 				return;
+			} catch (EOFException e) {
+				/*
+				 * Premature end of file. Calendar might still be valid though,
+				 * so ignore this for now.
+				 */
 			} catch (IOException e) {
 				Log.e(TAG, "Failed to download calendar " + calendarURL, e);
 				syncResult.stats.numIoExceptions++;
@@ -222,9 +227,28 @@ public class ICSCalendarSyncAdapterService extends Service {
 					loc = "";
 				else
 					loc = locProp.getValue();
+				
+				Property rruleProp = entry.getProperty("RRULE");
+				String rrule;
+				if (rruleProp == null)
+					rrule = null;
+				else
+					rrule = rruleProp.getValue();
+				
+				PropertyList exdateList = entry.getProperties("EXDATE");
+				ExDate exdateProp;
+				String exdate = null;
+				for (Object exdateObj : exdateList) {
+					exdateProp = (ExDate)exdateObj;
+					if (exdate == null)
+						exdate = exdateProp.getValue();
+					else 
+						exdate = exdate + "," + exdateProp.getValue();
+				}
+				Log.d(TAG, "Got exdate string: " + exdate);
 
 				//... and insert the event into the android calendar
-				calHandle.insertEvent(start, end, title, desc, loc, allDay);
+				calHandle.insertEvent(start, end, rrule, exdate, title, desc, loc, allDay);
 				syncResult.stats.numInserts++;
 				syncResult.stats.numEntries++;
 			}

@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -41,6 +42,8 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.CalendarContract.Events;
+import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.util.Base64;
 
 public class CalendarHandle {
@@ -62,6 +65,8 @@ public class CalendarHandle {
 	private static final String CALENDAR_COLOR = "calendar_color";
 	private static final String DTSTART = "dtstart";
 	private static final String DTEND = "dtend";
+	private static final String RRULE = "rrule";
+	private static final String EXDATE = "exdate";
 	private static final String TITLE = "title";
 	private static final String DESCRIPTION = "description";
 	private static final String TIMEZONE = "eventTimezone";
@@ -298,10 +303,22 @@ public class CalendarHandle {
 				null);
 	}
 	
-	public void insertEvent(Date start, Date end, String title, String desc, String loc, boolean allDay) {
+	public void insertEvent(
+			Date start, 
+			Date end, 
+			String rrule,
+			String exdate,
+			String title, 
+			String desc, 
+			String loc, 
+			boolean allDay) {
 		ContentResolver cr = mContext.getContentResolver();
 		ContentValues values = new ContentValues();
 		values.put(DTSTART, start.getTime());
+		if (rrule != null)
+			values.put(RRULE, rrule);
+		if (exdate != null)
+			values.put(EXDATE, exdate);
 		values.put(DTEND, end != null ? end.getTime() : start.getTime());
 		values.put(TITLE, title);
 		values.put(DESCRIPTION, desc);
