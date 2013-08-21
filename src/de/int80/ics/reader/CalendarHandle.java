@@ -16,15 +16,11 @@
 
 package de.int80.ics.reader;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -32,7 +28,6 @@ import java.util.concurrent.TimeoutException;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
 
-import net.fortuna.ical4j.data.CalendarBuilder;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -44,7 +39,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.CalendarContract;
 import android.provider.CalendarContract.Events;
-import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.util.Base64;
 
 public class CalendarHandle {
