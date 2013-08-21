@@ -42,6 +42,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.CalendarContract;
 import android.provider.CalendarContract.Events;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.util.Base64;
@@ -56,25 +57,7 @@ public class CalendarHandle {
 	private final Uri CALENDAR_URI;
 	private final Uri EVENTS_URI;
 	
-	//calendar DB field names
-	private static final String ACCOUNT_NAME = "account_name";
-	private static final String ACCOUNT_TYPE = "account_type";
-	private static final String CALENDAR_ID = "calendar_id";
-	private static final String EVENT_ID = "_id";
-	private static final String SYNC_TIMESTAMP = "cal_sync1";
-	private static final String CALENDAR_COLOR = "calendar_color";
-	private static final String DTSTART = "dtstart";
-	private static final String DTEND = "dtend";
-	private static final String RRULE = "rrule";
-	private static final String EXDATE = "exdate";
-	private static final String TITLE = "title";
-	private static final String DESCRIPTION = "description";
-	private static final String TIMEZONE = "eventTimezone";
-	private static final String ALLDAY = "allDay";
-	private static final String DISPLAYNAME = "calendar_displayName";
-	private static final String IS_SYNCADAPTER = "caller_is_syncadapter";
-	
-	private static final String TAG = "CalendarHandle";
+	private static final String SYNC_TIMESTAMP = Events.CAL_SYNC1;
 	
 	public static class CredentialsChecker extends AsyncTask<String, Integer, String> {
 
@@ -92,8 +75,6 @@ public class CalendarHandle {
 			final String calendarUrl = params[0];
 			final String user = params[1];
 			final String password = params[2];
-			InputStream in = null;
-
 			try {
 				url = new URL(calendarUrl);
 			} catch (MalformedURLException e) {
@@ -199,9 +180,9 @@ public class CalendarHandle {
 
 	private static Uri asSyncAdapter(Uri uri, String accountName, String accountType) {
 	    return uri.buildUpon()
-	        .appendQueryParameter(IS_SYNCADAPTER,"true")
-	        .appendQueryParameter(ACCOUNT_NAME, accountName)
-	        .appendQueryParameter(ACCOUNT_TYPE, accountType).build();
+	        .appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER,"true")
+	        .appendQueryParameter(Events.ACCOUNT_NAME, accountName)
+	        .appendQueryParameter(Events.ACCOUNT_TYPE, accountType).build();
 	 }
 	
 	public CalendarHandle(Context context, long calID, String name, String type) {
@@ -219,10 +200,10 @@ public class CalendarHandle {
 		EVENTS_URI = Uri.parse(context.getString(R.string.EVENTS_URI));
 
 		ContentValues values = new ContentValues();
-		values.put(ACCOUNT_NAME, name);
-		values.put(ACCOUNT_TYPE, type);
-		values.put(DISPLAYNAME, name);
-		values.put(CALENDAR_COLOR, color);
+		values.put(Events.ACCOUNT_NAME, name);
+		values.put(Events.ACCOUNT_TYPE, type);
+		values.put(Events.CALENDAR_DISPLAY_NAME, name);
+		values.put(Events.CALENDAR_COLOR, color);
 		Uri ret = context.getContentResolver().insert(
 				asSyncAdapter(CALENDAR_URI, name, type), 
 				values
@@ -240,7 +221,7 @@ public class CalendarHandle {
 	public int getColor() {
 		Cursor cursor = mContext.getContentResolver().query(
 				asSyncAdapter(CALENDAR_URI, accountName, accountType), 
-				new String[]{CALENDAR_COLOR}, 
+				new String[]{Events.CALENDAR_COLOR}, 
 				null, 
 				null, 
 				null);
@@ -249,14 +230,14 @@ public class CalendarHandle {
 			return 0xff000000;
 		}
 		cursor.moveToFirst();
-		int color = cursor.getInt(cursor.getColumnIndex(CALENDAR_COLOR));
+		int color = cursor.getInt(cursor.getColumnIndex(Events.CALENDAR_COLOR));
 		cursor.close();
 		return color;
 	}
 	
 	public void setColor(int color) {
 		ContentValues values = new ContentValues();
-		values.put(CALENDAR_COLOR, String.valueOf(color));
+		values.put(Events.CALENDAR_COLOR, String.valueOf(color));
 
 		mContext.getContentResolver().update(
 				asSyncAdapter(
@@ -314,24 +295,24 @@ public class CalendarHandle {
 			boolean allDay) {
 		ContentResolver cr = mContext.getContentResolver();
 		ContentValues values = new ContentValues();
-		values.put(DTSTART, start.getTime());
+		values.put(Events.DTSTART, start.getTime());
 		if (rrule != null)
-			values.put(RRULE, rrule);
+			values.put(Events.RRULE, rrule);
 		if (exdate != null)
-			values.put(EXDATE, exdate);
-		values.put(DTEND, end != null ? end.getTime() : start.getTime());
-		values.put(TITLE, title);
-		values.put(DESCRIPTION, desc);
-		values.put(CALENDAR_ID, calID);
-		values.put(TIMEZONE, "Europe/Berlin");
-		values.put(ALLDAY, allDay ? 1 : 0);
+			values.put(Events.EXDATE, exdate);
+		values.put(Events.DTEND, end != null ? end.getTime() : start.getTime());
+		values.put(Events.TITLE, title);
+		values.put(Events.DESCRIPTION, desc);
+		values.put(Events.CALENDAR_ID, calID);
+		values.put(Events.EVENT_TIMEZONE, "Europe/Berlin");
+		values.put(Events.ALL_DAY, allDay ? 1 : 0);
 		cr.insert(asSyncAdapter(EVENTS_URI, accountName, accountType), values);
 	}
 	
 	public int deleteAllEvents() {
 		ContentResolver cr = mContext.getContentResolver();
 		Cursor cursor = cr.query(asSyncAdapter(EVENTS_URI, accountName, accountType), 
-				new String[]{EVENT_ID}, null, null, null);
+				new String[]{Events._ID}, null, null, null);
 		if (cursor.getCount() == 0) {
 			cursor.close();
 			return 0;
@@ -340,7 +321,7 @@ public class CalendarHandle {
 		
 		cursor.moveToFirst();
 		while (! cursor.isAfterLast()) {
-			long eventID = cursor.getLong(cursor.getColumnIndex(EVENT_ID));
+			long eventID = cursor.getLong(cursor.getColumnIndex(Events._ID));
 			cr.delete(
 					asSyncAdapter(
 							ContentUris.withAppendedId(
