@@ -114,8 +114,9 @@ public class ICSCalendarSyncAdapterService extends Service {
 					connection = (HttpURLConnection) url.openConnection();
 				}
 				connection.setIfModifiedSince(lastSync);
-				connection.setRequestProperty("Authorization", "Basic " +
-						Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
+				if (userpass != null)
+					connection.setRequestProperty("Authorization", "Basic " +
+							Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP));
 
 				responseCode = connection.getResponseCode();
 				switch (responseCode) {
