@@ -49,4 +49,6 @@
         <item >12 hours</item>
         <item >24 hours</item>
         </string-array>
+    <string name="PROGRESS_DIALOG_TITLE">Please wait</string>
+    <string name="PROGRESS_DIALOG_TEXT">Checking settings</string>
 </resources>

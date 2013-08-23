@@ -29,6 +29,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -53,13 +54,31 @@ public class CalendarHandle {
 	
 	private static final String SYNC_TIMESTAMP = Events.CAL_SYNC1;
 	
-	public static class CredentialsChecker extends AsyncTask<String, Integer, String> {
+	public static class CredentialsChecker extends AsyncTask<String, Void, String> {
 
 		private Context mContext;
 		private static final String TAG = "CredentialsChecker";
+		private ProgressDialog pd;
 		
 		public CredentialsChecker(Context context) {
 			mContext = context;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			pd = new ProgressDialog(mContext);
+			pd.setTitle(mContext.getString(R.string.PROGRESS_DIALOG_TITLE));
+			pd.setMessage(mContext.getString(R.string.PROGRESS_DIALOG_TEXT));
+			pd.setCancelable(false);
+			pd.setIndeterminate(true);
+			pd.show();
+			super.onPreExecute();
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			pd.dismiss();
+			super.onPostExecute(result);
 		}
 		
 		@Override
