@@ -246,7 +246,6 @@ public class ICSCalendarSyncAdapterService extends Service {
 					else 
 						exdate = exdate + "," + exdateProp.getValue();
 				}
-				Log.d(TAG, "Got exdate string: " + exdate);
 
 				//... and insert the event into the android calendar
 				calHandle.insertEvent(start, end, rrule, exdate, title, desc, loc, allDay);
